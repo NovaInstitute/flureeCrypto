@@ -1,0 +1,11 @@
+Package: flureeCrypto
+Title: Crypto Functions fro Fluree based in clojure originals
+Version: 0.0.0.9000
+Authors@R: 
+    person("Christiaan", "Pauw", , "cjpauw@gmail.com", role = c("aut", "cre")[1],
+           comment = c(ORCID = "0000-0002-1546-1024"))
+Description: Provides the crypto functions from the Fluree  in natively R. These functions are based on the original clojure functions.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
