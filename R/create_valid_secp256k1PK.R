@@ -1,7 +1,17 @@
-library(openssl)
-library(gmp)
 
 # Generate a secure private key for the secp256k1 curve
+#' create_valid_secp256k1_private_key
+#' @return A hexadecimal string representing a valid private key for the secp256k1 curve.
+#' @export
+#' @import openssl
+#' @import gmp
+#' @examples
+#' private_key <- create_valid_secp256k1_private_key()
+#' print(private_key)
+#' private_bn <- gmp::as.bigz(paste0("0x", private_key))
+#' is_valid <- valid_private_key(private_bn)
+#' print(is_valid)  # This should now print TRUE
+
 create_valid_secp256k1_private_key <- function() {
   # Define the secp256k1 curve modulus
   modulus <- gmp::as.bigz("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141")
@@ -18,11 +28,5 @@ create_valid_secp256k1_private_key <- function() {
   }
 }
 
-# Example usage
-private_key <- create_valid_secp256k1_private_key()
-print(private_key)
 
-# Convert to bigz and validate (for verification)
-private_bn <- gmp::as.bigz(paste0("0x", private_key))
-is_valid <- valid_private_key(private_bn)
-print(is_valid)  # This should now print TRUE
+
