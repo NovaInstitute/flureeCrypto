@@ -6,6 +6,9 @@
 \usage{
 create_valid_secp256k1_private_key()
 }
+\value{
+A hexadecimal string representing a valid private key for the secp256k1 curve.
+}
 \description{
 create_valid_secp256k1_private_key
 }

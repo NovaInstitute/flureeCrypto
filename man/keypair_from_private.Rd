@@ -17,7 +17,7 @@ This function generates a public key from a given private key using the secp256k
 }
 \examples{
 private_key <- create_valid_secp256k1_private_key()
-key_pair <- public_key_from_private(private_key)
+key_pair <- keypair_from_private(private_key)
 print(key_pair$private)
 print(key_pair$public)
 
