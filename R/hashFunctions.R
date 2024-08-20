@@ -80,7 +80,7 @@ sha2_256_normalize <- function(s, output_format = "hex") {
 #' @examples
 #' sha2_512("Hello, world!")
 #' sha2_512(charToRaw("Hello, world!"), output_format = "base64")
-#'
+#' ## crypto.sha2_512("hi"); returns: 150a14ed5bea6cc731cf86c41566ac427a8db48ef1b9fd626664b3bfbb99071fa4c922f33dde38719b8c8354e2b7ab9d77e0e67fc12843920a712e73d558e197.
 #' @import openssl sodium
 #' @export
 sha2_512 <- function(x, output_format = "hex", input_format = NULL) {
