@@ -15,6 +15,6 @@
 #' @export
 normalize_string <- function(s) {
   # Normalize the string using NFKC form
-  normalized <- stringi::stri_trans_nfc(s) # NFKC normalization in R
+  normalized <- stringi::stri_trans_nfkc(s) # NFKC normalization in R
   return(normalized)
 }
