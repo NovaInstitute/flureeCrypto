@@ -1,0 +1,32 @@
+PROGRESS: 
+
+
+  Clojure                     R                         TRANSLATED    TESTED
+  ------------------------------------------------------------------------------
+  ":normalizeString"          "normalize-string"        y             y
+  ":stringToByteArray"        "stringToByteArr"         y             y
+  ":byteArrayToString"        "byteArrToString"         y             y                 
+  ":sha2_256"                 "sha2_256"                y     
+  ":sha2_256_normalize"       "sha2_256Normalized"      y
+  ":sha2_512"                 "sha2_512"                y
+  ":sha2_512_normalize"       "sha2_512Normalized"      y
+  ":sha3_256"                 "sha3_256"                y
+  ":sha3_256_normalize"       "sha3_256Normalized"      y
+  ":sha3_512"                 "sha3_512"                y
+  ":sha3_512_normalize"       "sha3_512Normalized"      y
+  ":ripemd_160"               "ripemd_160"              y
+  ":aesEncrypt"               "aesEncrypt"              y
+  ":aesDecrypt"               "aesDecrypt"              y
+  ":generateKeyPair"          "generateKeyPair"
+  ":pubKeyFromPrivate"        "pubKeyFromPriv"          y
+  ":accountIdFromPublic"      "accIdFromPublic"
+  ":accountIdFromPrivate"     "accIdFromPriv"
+  ":signMessage"              "signMessage"             y
+  ":verifySignature"          "verifySignature"
+  ":pubKeyFromMessage"        "pubKeyFromMessage"
+  ":accountIdFromMessage"     "accIdFromMessage"
+  ":scryptEncrypt"            "scryptEncrypt"
+  ":scryptCheck"              "scryptCheck"
+  ":randomBytes"              "randBytes"
+  ":createJWS"                "createJWS"
+  ":verifyJWS"                "verifyJWS"
