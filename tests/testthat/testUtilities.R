@@ -221,11 +221,9 @@ test_that("SHA3-256 Hash Length and Uniqueness", {
   expect_true(all(sapply(rdm_strs, function(x) nchar(sha3_256(x, output_format = "hex")) == 64)))
   
   # Test that the SHA-256 hash of the composed form is not equal to the hash of the decomposed for
-  expect_true(all(apply(composed_decomposed_df, 1, function(row) {
-    composed_hash <- sha3_256(row["composed"], output_format = "hex")
-    decomposed_hash <- sha3_256(row["decomposed"], output_format = "hex")
-    return(composed_hash != decomposed_hash)
-  })))
+  expect_false(all(mapply(function(comp, decomp) {
+    identical(sha3_256(comp), sha3_256(decomp))
+  }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
 })
 
 context("sha3-256_normalize")
@@ -239,22 +237,59 @@ test_that("SHA3-256 Normalize Hash Length and Consistency", {
   })))
   
   # Test 2: Normalized hashes of composed and decomposed strings should be equal
-  expect_true(all(apply(composed_decomposed_df, 1, function(row) {
-    composed_hash <- sha3_256_normalize(row["composed"], output_format = "hex")
-    decomposed_hash <- sha3_256_normalize(row["decomposed"], output_format = "hex")
-    return(composed_hash != decomposed_hash)
-  })))
+  expect_true(all(mapply(function(comp, decomp) {
+    identical(sha3_256_normalize(comp), sha3_256_normalize(decomp))
+  }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
 })
 
 
 # -----------------------------------------------------------------------------
 #     SHA3-512
+context("SHA3-512")
 # -----------------------------------------------------------------------------
+composed_decomposed_df <- data.frame(
+  composed = c("\u00e9", "\u00e2"),
+  decomposed = c("e\u0301", "a\u0302"),
+  stringsAsFactors = FALSE
+)
+
+test_that("SHA3-512 Hash Length and Uniqueness", {
+  rdm_strs <- replicate(10, {
+    random_string <- function(n) {
+      paste0(sample(c(letters, LETTERS, 0:9), n, replace = TRUE), collapse = "")
+    }
+    random_string(sample(1:1000, 1))
+  })
   
+  # Test that the SHA-256 hash of each string is 64 characters long
+  expect_true(all(sapply(rdm_strs, function(x) nchar(sha3_512(x, output_format = "hex")) == 128)))
+  
+  # Test that the SHA-256 hash of the composed form is not equal to the hash of the decomposed for
+  expect_false(all(mapply(function(comp, decomp) {
+    identical(sha3_512(comp), sha3_512(decomp))
+  }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
+})
+
+context("sha3-512_normalize")
+test_that("SHA3-512 Normalize Hash Length and Consistency", {
+  set.seed(123)
+  rdm_strs <- replicate(10, paste0(sample(c(letters, LETTERS, 0:9), size = sample(1:1000, 1), replace = TRUE), collapse = ""))
+  
+  # Test 1: The length of each SHA2-256 normalized hash should be 64 characters
+  expect_true(all(sapply(rdm_strs, function(s) {
+    nchar(sha3_512_normalize(s)) == 128
+  })))
+  
+  # Test 2: Normalized hashes of composed and decomposed strings should be equal
+  expect_true(all(mapply(function(comp, decomp) {
+    identical(sha3_512_normalize(comp), sha3_512_normalize(decomp))
+  }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
+})
   
   
 
 #  2 hours sha2-256 tests 
+# 3 hours to finish hash function tests.
   
   
   

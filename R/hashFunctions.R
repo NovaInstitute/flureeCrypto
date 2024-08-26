@@ -164,7 +164,7 @@ sha3_256 <- function(x, output_format = "hex", input_format = NULL) {
 
   # Convert input to a raw vector if it is a string
   if (input_format == "string") {
-    x <- charToRaw(normalize_string(x))
+    x <- charToRaw(x)
   }
 
   # Calculate the SHA3-256 hash
@@ -233,7 +233,7 @@ sha3_512 <- function(x, output_format = "hex", input_format = NULL) {
   
   # Convert input to a raw vector if it is a string
   if (input_format == "string") {
-    x <- charToRaw(normalize_string(x))
+    x <- charToRaw(x)
   }
   
   # Calculate the SHA3-512 hash
