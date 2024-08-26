@@ -10,10 +10,10 @@ PROGRESS:
   ":sha2_256_normalize"       "sha2_256Normalized"      y             y
   ":sha2_512"                 "sha2_512"                y             y
   ":sha2_512_normalize"       "sha2_512Normalized"      y             y
-  ":sha3_256"                 "sha3_256"                y
-  ":sha3_256_normalize"       "sha3_256Normalized"      y
-  ":sha3_512"                 "sha3_512"                y
-  ":sha3_512_normalize"       "sha3_512Normalized"      y
+  ":sha3_256"                 "sha3_256"                y             y
+  ":sha3_256_normalize"       "sha3_256Normalized"      y             y
+  ":sha3_512"                 "sha3_512"                y             y
+  ":sha3_512_normalize"       "sha3_512Normalized"      y             y
   ":ripemd_160"               "ripemd_160"              y
   ":aesEncrypt"               "aesEncrypt"              y
   ":aesDecrypt"               "aesDecrypt"              y
