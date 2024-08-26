@@ -79,12 +79,15 @@ coerce_input_format <- function(x) {
 #' @export
 string_to_byte_array <- function(s) {
   if (is.raw(s)) {
-    return(s)
+    return(s)   # Input is already a raw vector; return as-is
   } else if (is.character(s)) {
     # Normalize the string using the previously defined function
     normalized_string <- normalize_string(s)
     # Convert the normalized string to a raw vector (byte array)
-    return(charToRaw(normalized_string))
+    raw_vector <- charToRaw(normalized_string)
+    # Convert raw vector to numeric vector (ASCII values)
+    byte_array <- as.numeric(raw_vector)
+    return(byte_array)
   } else {
     stop("Unsupported input type. Expected a string or a raw vector.")
   }
@@ -106,10 +109,14 @@ string_to_byte_array <- function(s) {
 #'
 #' @export
 byte_array_to_string <- function(s) {
-  if (!is.raw(s)) {
-    stop("Input must be a raw vector representing a byte array.")
+  if (is.raw(s)) {
+    # Input is already a raw vector, convert to string
+    return(rawToChar(s))
+  } else if (is.numeric(s)) {
+    # Input is a numeric vector, convert to raw vector first
+    raw_vector <- as.raw(s)
+    return(rawToChar(raw_vector))
+  } else {
+    stop("Unsupported input type. Expected a raw vector or numeric vector.")
   }
-
-  # Convert the raw vector (byte array) to a string
-  return(rawToChar(s))
 }
