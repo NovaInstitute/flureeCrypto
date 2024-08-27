@@ -57,6 +57,7 @@ test_that("String to byte conversions and back", {
     s == byte_array_to_string(string_to_byte_array(s))
   })))
   
+  context("Test given in documentation")
   # Test the examples given in the documentation
   input <- "hi there"
   
@@ -79,8 +80,8 @@ test_that("String to byte conversions and back", {
 context("sha2-256")
 # -----------------------------------------------------------------------------
 composed_decomposed_df <- data.frame(
-  composed = c("\u00e9", "\u00e2"),
-  decomposed = c("e\u0301", "a\u0302"),
+  composed = c("\u00C5", "\u212B", "\u00e9"),
+  decomposed = c("\u0041\u030a", "\u0041\u030a", "\u0065\u0301"),
   stringsAsFactors = FALSE
 )
 
@@ -103,9 +104,10 @@ test_that("SHA2-256 Hash Length and Uniqueness", {
   })))
   
   # Test the examples given in the documentation
+  context("Tests given in documentation")
   test_cases <- data.frame(
-    input = c("\u0041\u030apple"),
-    expected_output = c("6e9288599c1ff90127459f82285327c83fa0541d8b7cd215d0cd9e587150c15f"),
+    input = c("\u0041\u030apple", "hi"),
+    expected_output = c("6e9288599c1ff90127459f82285327c83fa0541d8b7cd215d0cd9e587150c15f", "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4"),
     stringsAsFactors = FALSE
   )
   
@@ -136,9 +138,10 @@ test_that("SHA2-256 Normalize Hash Length and Consistency", {
   })))
 
   # Test the examples given in the documentation
+  context("Tests given in documentation")
   test_cases <- data.frame(
-    input = c("\u0041\u030apple"),
-    expected_output = c("58acf888b520fe51ecc0e4e5eef46c3bea3ca7df4c11f6719a1c2471bbe478bf"),
+    input = c("\u0041\u030apple", "hi"),
+    expected_output = c("58acf888b520fe51ecc0e4e5eef46c3bea3ca7df4c11f6719a1c2471bbe478bf", "8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4"),
     stringsAsFactors = FALSE
   )
   
@@ -166,17 +169,30 @@ test_that("SHA2-512 Hash Length and Uniqueness", {
     random_string(sample(1:1000, 1))
   })
   
-context("length")
   # Test that the SHA-512 hash of each string is 128 characters long
   expect_true(all(sapply(rdm_strs, function(s) {
     nchar(sha2_512(s)) == 128
   })))
   
-context("identical")
   # Test that the SHA-512 hash of the composed form is not equal to the hash of the decomposed for
   expect_false(all(mapply(function(comp, decomp) {
     identical(sha2_512(comp), sha2_512(decomp))
   }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
+  
+  # Test the example given in the documentation
+  context("Test given in documentation")
+  test_cases <- data.frame(
+    input = c("hi"),
+    expected_output = c("150a14ed5bea6cc731cf86c41566ac427a8db48ef1b9fd626664b3bfbb99071fa4c922f33dde38719b8c8354e2b7ab9d77e0e67fc12843920a712e73d558e197"),
+    stringsAsFactors = FALSE
+  )
+  
+  # Test each case
+  for (i in seq_len(nrow(test_cases))) {
+    input <- test_cases$input[i]
+    expected_output <- test_cases$expected_output[i]
+    expect_equal(sha2_512(input), expected_output)
+  }
 })
 
 context("sha2-512_normalized")
@@ -193,6 +209,21 @@ test_that("SHA2-512 Normalize Hash Length and Consistency", {
   expect_true(all(mapply(function(comp, decomp) {
     identical(sha2_512_normalize(comp), sha2_512_normalize(decomp))
   }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
+  
+  # Test the example given in the documentation
+  context("Test given in documentation")
+  test_cases <- data.frame(
+    input = c("hi"),
+    expected_output = c("150a14ed5bea6cc731cf86c41566ac427a8db48ef1b9fd626664b3bfbb99071fa4c922f33dde38719b8c8354e2b7ab9d77e0e67fc12843920a712e73d558e197"),
+    stringsAsFactors = FALSE
+  )
+  
+  # Test each case
+  for (i in seq_len(nrow(test_cases))) {
+    input <- test_cases$input[i]
+    expected_output <- test_cases$expected_output[i]
+    expect_equal(sha2_512_normalize(input), expected_output)
+  }
 })
 
 
@@ -203,11 +234,6 @@ test_that("SHA2-512 Normalize Hash Length and Consistency", {
 #     SHA3-256 
 context("SHA3-256")
 # -----------------------------------------------------------------------------
-composed_decomposed_df <- data.frame(
-  composed = c("\u00e9", "\u00e2"),
-  decomposed = c("e\u0301", "a\u0302"),
-  stringsAsFactors = FALSE
-)
 
 test_that("SHA3-256 Hash Length and Uniqueness", {
   rdm_strs <- replicate(10, {
@@ -224,6 +250,21 @@ test_that("SHA3-256 Hash Length and Uniqueness", {
   expect_false(all(mapply(function(comp, decomp) {
     identical(sha3_256(comp), sha3_256(decomp))
   }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
+  
+  # Test the example given in the documentation
+  context("Test given in documentation")
+  test_cases <- data.frame(
+    input = c("hi"),
+    expected_output = c("b39c14c8da3b23811f6415b7e0b33526d7e07a46f2cf0484179435767e4a8804"),
+    stringsAsFactors = FALSE
+  )
+  
+  # Test each case
+  for (i in seq_len(nrow(test_cases))) {
+    input <- test_cases$input[i]
+    expected_output <- test_cases$expected_output[i]
+    expect_equal(sha3_256(input), expected_output)
+  }
 })
 
 context("sha3-256_normalize")
@@ -240,6 +281,21 @@ test_that("SHA3-256 Normalize Hash Length and Consistency", {
   expect_true(all(mapply(function(comp, decomp) {
     identical(sha3_256_normalize(comp), sha3_256_normalize(decomp))
   }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
+  
+  # Test the example given in the documentation
+  context("Test given in documentation")
+  test_cases <- data.frame(
+    input = c("hi"),
+    expected_output = c("b39c14c8da3b23811f6415b7e0b33526d7e07a46f2cf0484179435767e4a8804"),
+    stringsAsFactors = FALSE
+  )
+  
+  # Test each case
+  for (i in seq_len(nrow(test_cases))) {
+    input <- test_cases$input[i]
+    expected_output <- test_cases$expected_output[i]
+    expect_equal(sha3_256_normalize(input), expected_output)
+  }
 })
 
 
@@ -247,11 +303,6 @@ test_that("SHA3-256 Normalize Hash Length and Consistency", {
 #     SHA3-512
 context("SHA3-512")
 # -----------------------------------------------------------------------------
-composed_decomposed_df <- data.frame(
-  composed = c("\u00e9", "\u00e2"),
-  decomposed = c("e\u0301", "a\u0302"),
-  stringsAsFactors = FALSE
-)
 
 test_that("SHA3-512 Hash Length and Uniqueness", {
   rdm_strs <- replicate(10, {
@@ -268,6 +319,21 @@ test_that("SHA3-512 Hash Length and Uniqueness", {
   expect_false(all(mapply(function(comp, decomp) {
     identical(sha3_512(comp), sha3_512(decomp))
   }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
+  
+  # Test the example given in the documentation
+  context("Test given in documentation")
+  test_cases <- data.frame(
+    input = c("hi"),
+    expected_output = c("154013cb8140c753f0ac358da6110fe237481b26c75c3ddc1b59eaf9dd7b46a0a3aeb2cef164b3c82d65b38a4e26ea9930b7b2cb3c01da4ba331c95e62ccb9c3"),
+    stringsAsFactors = FALSE
+  )
+  
+  # Test each case
+  for (i in seq_len(nrow(test_cases))) {
+    input <- test_cases$input[i]
+    expected_output <- test_cases$expected_output[i]
+    expect_equal(sha3_512(input), expected_output)
+  }
 })
 
 context("sha3-512_normalize")
@@ -284,15 +350,19 @@ test_that("SHA3-512 Normalize Hash Length and Consistency", {
   expect_true(all(mapply(function(comp, decomp) {
     identical(sha3_512_normalize(comp), sha3_512_normalize(decomp))
   }, composed_decomposed_df$composed, composed_decomposed_df$decomposed)))
+  
+  # Test the example given in the documentation
+  context("Test given in documentation")
+  test_cases <- data.frame(
+    input = c("hi"),
+    expected_output = c("154013cb8140c753f0ac358da6110fe237481b26c75c3ddc1b59eaf9dd7b46a0a3aeb2cef164b3c82d65b38a4e26ea9930b7b2cb3c01da4ba331c95e62ccb9c3"),
+    stringsAsFactors = FALSE
+  )
+  
+  # Test each case
+  for (i in seq_len(nrow(test_cases))) {
+    input <- test_cases$input[i]
+    expected_output <- test_cases$expected_output[i]
+    expect_equal(sha3_512_normalize(input), expected_output)
+  }
 })
-  
-  
-
-#  2 hours sha2-256 tests 
-# 3 hours to finish hash function tests.
-  
-  
-  
-  
-  
-  
