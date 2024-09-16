@@ -10,7 +10,6 @@ library(flureeCrypto)
 #     NORMALIZED STRING 
 context("Normalize string test")
 # -----------------------------------------------------------------------------
-library(stringi)
 
 test_that("Normalize string test", {
   # Generate a random string of length 10
@@ -68,7 +67,7 @@ test_that("String to byte conversions and back", {
   expected_output <- c(104, 105, 32, 116, 104, 101, 114, 101)
   
   # Compare the result to the expected output
-  expect_equal(byte_array, expected_output)
+  expect_equal(output, expected_output)
 })
 
 
@@ -366,3 +365,81 @@ test_that("SHA3-512 Normalize Hash Length and Consistency", {
     expect_equal(sha3_512_normalize(input), expected_output)
   }
 })
+
+
+
+
+
+# -----------------------------------------------------------------------------
+#     ripemd-160
+context("ripemd-160")
+# -----------------------------------------------------------------------------
+
+test_that("RIPEMD-160 Hash", {
+  # Compute the hash
+  hash_result <- ripemd_160("hi there!")
+  
+  # Check if the result matches the expected hash
+  expect_equal(hash_result, "ad6ce46f7f1ea8519dc02ce8ce0c278c6ff329b2")
+})
+
+
+
+
+
+# -----------------------------------------------------------------------------
+#     AES Encrypt
+context("aes-encrypt")
+# -----------------------------------------------------------------------------
+
+test_that("AES Encrypt", {
+  initialization_vector = as.raw(c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42))
+  message = "hi"
+  key = "there"
+  
+  output = encrypt(message, key, initialization_vector)
+  
+  # Check if the result matches the expected hash
+  expect_equal(output, "668cd07d1a17cc7a8a0390cf017ac7ef")
+})
+
+# -----------------------------------------------------------------------------
+#     AES Decrypt
+context("aes-decrypt")
+# -----------------------------------------------------------------------------
+
+#test_that("AES Decrypt", {
+#  initialization_vector = as.raw(c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42))
+#  message = "hi"
+#  key = "there"
+#  encrypted = aes_encrypt(message, initialization_vector, key)
+#  decrypted = aes_decrypt(encrypted, initialization_vector, key)
+  
+  # Check if the result matches the expected hash
+#  expect_equal(decrypted, "hi")
+#})
+
+
+
+
+
+# -----------------------------------------------------------------------------
+#     Generate Keypair
+context("generate keypair")
+# -----------------------------------------------------------------------------
+
+library(stringr)
+keypair <- generate_keypair()
+print(keypair$private)
+raw_private_key <- hex2bin(keypair$private)
+is_valid_private_key(raw_private_key)
+
+message = "hi there"
+privateKey = "6a5f415f49986006815ae7887016275aac8ffb239f9a2fa7172300578582b6c2"
+signature <- sign_hash(message, privateKey)
+signature
+
+str_length(signature)
+str_length("1b3046022100cbd32e463567fefc2f120425b0224d9d263008911653f50e83953f47cfbef3bc022100fcf81206277aa1b86d2667b4003f44643759b8f4684097efd92d56129cd89ea8")
+
+

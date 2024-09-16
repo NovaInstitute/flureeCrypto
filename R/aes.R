@@ -1,76 +1,94 @@
-#' AES Encryption with CBC Mode
+#' Encrypt Data Using AES in CBC Mode
 #'
-#' This function encrypts data using AES encryption in CBC mode with PKCS7 padding (compatible with PKCS5).
+#' This function performs AES encryption in CBC mode with PKCS#7 padding.
 #'
-#' @param iv A raw vector representing the initialization vector (IV).
-#' @param key A raw vector representing the key for AES encryption. It should be exactly 16, 24, or 32 bytes.
-#' @param data A raw vector representing the data to be encrypted.
-#'
+#' @param iv A raw vector of length 16 representing the initialization vector.
+#' @param key A raw vector of length 32 representing the AES key.
+#' @param data A raw vector or character string representing the plaintext data to encrypt.
 #' @return A raw vector representing the encrypted data.
-#'
-#' @import openssl
 #' @export
 encrypt_aes_cbc <- function(iv, key, data) {
-  # Ensure the key is 16, 24, or 32 bytes
-  if (length(key) != 16 && length(key) != 24 && length(key) != 32) {
-    stop("Key must be 16, 24, or 32 bytes long.")
+  # Ensure key and iv are raw vectors
+  if (!is.raw(key)) {
+    stop("Key must be a raw vector")
   }
-
-  # Perform AES encryption in CBC mode with PKCS7 padding
-  encrypted_data <- openssl::aes_cbc_encrypt(data, key = key, iv = iv)
-
+  if (!is.raw(iv)) {
+    iv <- as.raw(iv)
+  }
+  
+  # Convert data to raw if it's a character string
+  if (is.character(data)) {
+    data <- charToRaw(data)
+  }
+  
+  # Pad data with PKCS#7 padding
+  print(class(data))
+  padded_data <- as.raw(pad_pkcs7(data, 16))
+  
+  # Debugging prints
+  print("Key (raw):")
+  print(key)
+  print("IV (raw):")
+  print(iv)
+  print("Padded data (raw):")
+  print(padded_data)
+  
+  # Perform AES encryption in CBC mode
+  encrypted_data <- aes_cbc_encrypt(padded_data, key, iv)
+  
+  print("Encrypted data (raw):")
+  print(encrypted_data)
+  
   return(encrypted_data)
 }
 
-
-#' Encrypt with AES/CBC/PKCS7Padding
+#' Encrypt Data with AES/CBC/PKCS7 Padding
 #'
-#' Encrypts the input using AES encryption in CBC mode with PKCS7 padding. The key is hashed to 256 bits.
-#' You can provide an alternate initialization vector (IV) of unsigned bytes of size 16 for CBC.
-#'
-#' @param x The input to be encrypted, either a character string or a raw vector.
-#' @param key The encryption key as a character string or raw vector. It will be hashed to 256 bits if provided as a string.
-#' @param iv A raw vector representing the initialization vector (IV). Defaults to a pre-defined 16-byte vector.
-#' @param output_format The format of the output. Options are "hex" (default), "base64", or "none" for raw bytes.
-#'
-#' @return The encrypted data in the specified format.
-#'
-#' @import openssl
-#' @import sodium
+#' @param x The input data to encrypt. This can be a character string or a raw vector.
+#' @param key The encryption key. This can be a character string (hashed into a 256-bit key) or a raw vector.
+#' @param iv An optional vector of unsigned bytes of size 16 to be used as the initialization vector. Defaults to a predefined IV.
+#' @param output_format The desired format for the encrypted output: "hex", "base64", or "none".
+#' @return The encrypted data in the specified output format.
 #' @export
-#' @examples
-#' # Example usage:
-#' encrypted <- encrypt_aes("Hello, World!", "mysecretkey")
-#' print(encrypted)
-encrypt_aes <- function(x, key, iv = as.raw(c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42)),
-                        output_format = "hex") {
-
-  # Convert the key to a 256-bit hash if it's a character string
+encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42), output_format = "hex") {
+  # If key is a string, hash it into a 256-bit key (32 bytes)
   if (is.character(key)) {
-    key <- sha256(charToRaw(key))
-  } else if (!is.raw(key)) {
-    stop("Key must be a character string or a raw vector.")
+    key <- hash_string_key(key)
+    key <- charToRaw(key)
+    print(class(key))
+    print(key)
   }
-
-  # Convert the input to a raw vector if it's a character string
+  
+  # Convert iv to raw vector if not already raw
+  if (!is.raw(iv)) {
+    iv <- as.raw(iv)
+  }
+  
+  # Convert input data (x) to raw bytes if it's a character string
   if (is.character(x)) {
     x <- charToRaw(x)
-  } else if (!is.raw(x)) {
-    stop("Input must be a character string or a raw vector.")
   }
-
-  # Perform AES encryption using the encrypt_aes_cbc function
-  encrypted_data <- encrypt_aes_cbc(iv, key, x)
-
-  # Return the encrypted data in the specified output format
+  
+  # Perform AES encryption
+  encrypted <- encrypt_aes_cbc(iv, key, x)
+  
+  # Debugging prints
+  print("Encrypted data (before formatting):")
+  print(encrypted)
+  
+  # Convert encrypted output to desired format
   if (output_format == "hex") {
-    return(bin2hex(encrypted_data))
+    hex_output <- paste(toupper(as.character(encrypted)), collapse = "")
+    print("Encrypted data (hex):")
+    print(hex_output)
+    return(hex_output)
   } else if (output_format == "base64") {
-    return(base64enc::base64encode(encrypted_data))
-  } else if (output_format == "none") {
-    return(encrypted_data)
+    base64_output <- base64_encode(encrypted)
+    print("Encrypted data (base64):")
+    print(base64_output)
+    return(base64_output)
   } else {
-    stop("Unsupported output format. Use 'hex', 'base64', or 'none'.")
+    return(encrypted)  # Return raw bytes by default
   }
 }
 
@@ -158,47 +176,6 @@ decrypt_aes <- function(x, key, iv = as.raw(c(6, 224, 71, 170, 241, 204, 115, 21
   } else {
     stop("Unsupported output format. Use 'string', 'hex', or 'none'.")
   }
-}
-
-#' AES Encryption Wrapper Function
-#'
-#' Encrypts the input using AES encryption in CBC mode with PKCS7 padding, with default output format as hexadecimal.
-#'
-#' @param x The input to be encrypted, either a character string or a raw vector.
-#' @param iv A raw vector representing the initialization vector (IV).
-#' @param key The encryption key as a character string or raw vector. It will be hashed to 256 bits if provided as a string.
-#' @param output_format The format of the output. Options are "hex" (default), "base64", or "none" for raw bytes.
-#'
-#' @return The encrypted data in the specified format.
-#'
-#' @examples
-#' aes_encrypt("Encrypt this message!", charToRaw("thisisaniv123456"), "mysecretpassword")
-#'
-#' @import openssl
-#' @export
-aes_encrypt <- function(x, iv, key, output_format = "hex") {
-  encrypt_aes(x, key, iv, output_format = output_format)
-}
-#' AES Decryption Wrapper Function
-#'
-#' Decrypts the input using AES decryption in CBC mode with PKCS7 padding, with default input format as hexadecimal and output format as a string.
-#'
-#' @param x The input to be decrypted, either a character string or a raw vector.
-#' @param iv A raw vector representing the initialization vector (IV).
-#' @param key The decryption key as a character string or raw vector. It will be hashed to 256 bits if provided as a string.
-#' @param output_format The format of the output. Options are "string" (default), "hex", or "none" for raw bytes.
-#' @param input_format The format of the encrypted input. Options are "hex" (default) or "base64".
-#'
-#' @return The decrypted data in the specified format.
-#'
-#' @examples
-#' encrypted_hex <- aes_encrypt("Encrypt this message!", charToRaw("thisisaniv123456"), "mysecretpassword")
-#' aes_decrypt(encrypted_hex, charToRaw("thisisaniv123456"), "mysecretpassword")
-#'
-#' @import openssl
-#' @export
-aes_decrypt <- function(x, iv, key, output_format = "string", input_format = "hex") {
-  decrypt_aes(x, key, iv, input_format = input_format, output_format = output_format)
 }
 
 

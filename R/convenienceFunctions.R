@@ -24,10 +24,10 @@ hash_string_key <- function(key, n = 32) {
   }
 
   # Compute the SHA3-512 hash
-  hash_512 <- digest(key, algo = "sha512", serialize = FALSE, raw = TRUE)
+  hash_512 <- sha3_512(key)
 
   # Return the first n bytes of the hash
-  return(hash_512[1:n])
+  return(substr(hash_512, 1, n))
 }
 
 
