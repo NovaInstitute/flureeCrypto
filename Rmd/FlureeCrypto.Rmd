@@ -1,0 +1,22 @@
+---
+title: "Fluree Crypto"
+author: "Fluree"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+  pdf_document:
+    toc: true
+---
+
+```{r include=FALSE}
+dr1 <- "/Users/christiaanpauw/fluree.crypto/src/fluree/crypto.cljc"
+dr <- "/Users/christiaanpauw/fluree.crypto/src/"
+source("~/git2pdf/R/generate_rmd_content.R")
+```
+
+`r generate_rmd_content(dr)`
+
+
+

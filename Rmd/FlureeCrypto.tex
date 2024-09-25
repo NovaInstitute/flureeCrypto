@@ -1,0 +1,1094 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Fluree Crypto},
+  pdfauthor={Christiaan Pauw},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Fluree Crypto}
+\author{Christiaan Pauw}
+\date{2024-08-16}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\section{fluree}\label{fluree}
+
+\section{crypto}\label{crypto}
+
+\subsection{aes.cljc}\label{aes.cljc}
+
+(ns fluree.crypto.aes (:require {[}alphabase.core :as alphabase{]}
+{[}fluree.crypto.util :as util{]} \#?@(:cljs {[}{[}goog.crypt.Aes{]}
+{[}goog.crypt.Cbc{]} {[}fluree.crypto.pkcs7 :as pkcs7{]}{]})) \#?(:clj
+(:import (java.security SecureRandom) (javax.crypto KeyGenerator Cipher)
+(javax.crypto.spec SecretKeySpec IvParameterSpec))))
+
+\#?(:clj (set! \emph{warn-on-reflection} true))
+
+(defn encrypt* {[}iv key-ba ba{]} \#?(:clj (let {[}iv (IvParameterSpec.
+(byte-array (mapv \#(if (\textgreater{} \% 127) (- \% 256) \%) iv)))
+spec (SecretKeySpec. (byte-array 32 key-ba) ``AES'') cipher
+(Cipher/getInstance ``AES/CBC/PKCS5Padding''){]} (.init cipher
+Cipher/ENCRYPT\_MODE spec iv) (.doFinal cipher ba)) :cljs (let {[}cipher
+(goog.crypt.Aes. key-ba) cbc (goog.crypt.Cbc. cipher) padded
+(pkcs7/encode 16 ba){]} (.encrypt cbc padded (clj-\textgreater js
+iv)))))
+
+(defn \^{}:export encrypt ``Encrypts with AES/CBC/PKCS\{5/7\}Padding by
+hashing a 256 bit key out of key (requires Unlimited Strength crypto to
+be enabled). You can provide an alternate initial vector of unsigned(!)
+bytes of size 16 for CBC.'' {[}x key \& {[}\{:keys {[}iv
+output-format{]} :or \{iv {[}6 224 71 170 241 204 115 21 30 8 46 223 106
+207 55 42{]} output-format :hex\}\}{]}{]} (let {[}key-ba (if (string?
+key) (util/hash-string-key key 32) key) ba (if (string? x)
+(alphabase/string-\textgreater bytes x) x) encrypted (encrypt* iv key-ba
+ba){]} (case (keyword output-format) :none encrypted :hex
+(alphabase/bytes-\textgreater hex encrypted) :base64
+(alphabase/bytes-\textgreater base64 encrypted))))
+
+(defn decrypt* {[}iv key-ba x-ba{]} \#?(:clj (let {[}iv
+(IvParameterSpec. (byte-array (mapv \#(if (\textgreater{} \% 127) (- \%
+256) \%) iv))) spec (SecretKeySpec. (byte-array 32 key-ba) ``AES'')
+cipher (Cipher/getInstance ``AES/CBC/PKCS5Padding''){]} (.init cipher
+Cipher/DECRYPT\_MODE spec iv) (.doFinal cipher x-ba)) :cljs (let
+{[}cipher (goog.crypt.Aes. key-ba) cbc (goog.crypt.Cbc. cipher){]}
+(pkcs7/decode 16 (.decrypt cbc x-ba (clj-\textgreater js iv))))))
+
+(defn \^{}:export decrypt ``Decrypts with AES/CBC/PKCS\{5/7\}Padding by
+hashing a 256 bit key out of key. You can provide an alternate initial
+vector of unsigned(!) bytes of size 16 for CBC.'' {[}x key \& {[}\{:keys
+{[}iv input-format output-format{]} :or \{iv {[}6 224 71 170 241 204 115
+21 30 8 46 223 106 207 55 42{]} input-format :hex output-format
+:string\}\}{]}{]} (let {[}key-ba (if (string? key) (util/hash-string-key
+key 32) key) x-ba (if (string? x) (case (keyword input-format) :hex
+(alphabase/hex-\textgreater bytes x) :base64
+(alphabase/base64-\textgreater bytes x)) x) decrypt-ba (decrypt* iv
+key-ba x-ba){]} (case (keyword output-format) :none decrypt-ba :hex
+(alphabase/bytes-\textgreater hex decrypt-ba) :string
+(alphabase/bytes-\textgreater string decrypt-ba))))
+
+\subsection{encodings.cljc}\label{encodings.cljc}
+
+(ns fluree.crypto.encodings (:require {[}clojure.string :as str{]}
+\#?@(:cljs {[}{[}fluree.crypto.asn1 :as asn1{]} {[}``@fluree/sjcl'' :as
+sjcl{]} {[}fluree.crypto.bn :as bn{]}{]}) {[}alphabase.core :as
+alphabase{]}) \#?(:clj (:import (org.bouncycastle.asn1 ASN1Integer
+ASN1InputStream ASN1Sequence DERSequenceGenerator)
+(org.bouncycastle.crypto.params ECDomainParameters)
+(org.bouncycastle.math.ec ECPoint) (java.io ByteArrayOutputStream))))
+
+\#?(:clj (set! \emph{warn-on-reflection} true))
+
+(defn \^{}:export pad-hex ``Pads a hex value with a leading zero if
+odd.'' {[}hex{]} (if (odd? (count hex)) (str ``0'' hex) hex))
+
+(defn biginteger-\textgreater hex ``Hex-encode java.math.BigInteger
+(clj) or sjcl.bn (cljs).'' {[}bn{]} \#?(:clj (-\textgreater{}
+\^{}BigInteger bn (.toString 16) pad-hex) :cljs (-\textgreater{} bn
+.toString (.replace \#``\^{}0x'' ``\,``) pad-hex)))
+
+(defn biginteger-\textgreater bytes ``Return bytes of
+java.math.BigInteger (clj) or sjcl.bn (cljs).'' ({[}bn{]}
+(biginteger-\textgreater bytes bn nil)) ({[}bn l{]} \#?(:clj
+(-\textgreater{} \^{}BigInteger bn .toByteArray) :cljs (-\textgreater{}
+bn (.toBits l) sjcl/codec.bytes.fromBits))))
+
+(defn bytes-\textgreater biginteger ``Return bytes of
+java.math.BigInteger (clj) or sjcl.bn (cljs).'' {[}\^{}bytes ba{]}
+\#?(:clj (BigInteger. ba) :cljs (-\textgreater{} ba
+sjcl/codec.bytes.toBits (sjcl/bn.))))
+
+(defn hex-\textgreater biginteger ``Return bytes of java.math.BigInteger
+(clj) or sjcl.bn (cljs).'' {[}\^{}String hex{]} \#?(:clj (BigInteger.
+hex 16) :cljs (.initWith (sjcl/bn.) hex)))
+
+(defn byte-\textgreater int {[}the-bytes{]} (let {[}the-bytes (bytes
+the-bytes){]} (-\textgreater{} (aget the-bytes 0) int)))
+
+\#?(:cljs (defn bn-even? ``Tests is an sjcl.bn (cljs) is even. Returns
+boolean if so.'' {[}sjcl-bn{]} (-\textgreater{} sjcl-bn .-limbs ;;
+.limbs holds array of numbers (get 0) ;; first array number is lowest
+bits (bit-and 1) (zero?))))
+
+;; adapted from \url{https://github.com/Sepia-Officinalis/secp256k1}
+\#?(:cljs (defn modular-square-root ``Compute the square root of a
+number modulo a prime. Number and modulus should be big numbers (bn).''
+{[}n modulus{]} (let {[}n (.mod n modulus) mod8 (-\textgreater{} modulus
+(.mod 8) .toString js/parseInt){]} (assert (bn/\textgreater= modulus 0),
+``Modulus must be non-negative'') (cond (.equals n 0) n
+
+\begin{verbatim}
+     (.equals n 1) n 
+
+     ;; http://www.mersennewiki.org/index.php/Modular_Square_Root#Modulus_equal_to_2 
+     (.equals modulus 2) 
+     (.mod n modulus) 
+
+     ;; http://www.mersennewiki.org/index.php/Modular_Square_Root#Modulus_congruent_to_3_modulo_4 
+     (or (= mod8 3) (= mod8 7)) 
+     (let [m (-> modulus (.add 1) .normalize .halveM .halveM)] 
+       (.powermod n m modulus)) 
+
+     ;; http://www.mersennewiki.org/index.php/Modular_Square_Root#Modulus_congruent_to_5_modulo_8 
+     (= mod8 5) 
+     (let [m (-> modulus (.sub 5) .normalize .halveM .halveM .halveM) 
+           v (.powermod (.add n n) m modulus) 
+           i (-> (.multiply v v) (.multiply n) (.multiply 2) (.sub 1) (.mod modulus))] 
+       (-> n (.multiply v) (.multiply i) (.mod modulus))) 
+
+     ;; http://www.mersennewiki.org/index.php/Modular_Square_Root#Modulus_congruent_to_1_modulo_8 
+     (= mod8 1) 
+     (let [q   (-> modulus (.sub 1) .normalize) 
+           e   (->> q 
+                    (iterate #(.halveM %)) 
+                    (take-while even?) 
+                    count) 
+           two (sjcl/bn. 2) 
+           z   (->> (range) rest rest 
+                    (map #(sjcl/bn. %)) 
+                    (map #(.powermod % q modulus)) 
+                    (filter 
+                      #(not 
+                         (.equals 
+                           (.powermod % (.pow two (- e 1)) modulus) 
+                           1))) 
+                    first) 
+           x   (.powermod n (-> q (.sub 1) .normalize .halveM) modulus)] 
+       (loop [y z, 
+              r e, 
+              v (-> n (.multiply x) (.mod modulus)), 
+              w (-> n (.multiply x) (.multiply x) (.mod modulus))] 
+         (if (.equals w 1) 
+           v 
+           (let [k (->> (range) 
+                        (map #(vector 
+                                % 
+                                (.powermod w (.pow two %) modulus))) 
+                        (filter #(.equals (second %) 1)) 
+                        first first) 
+                 d (.powermod y (.pow two (- r k 1)) modulus) 
+                 y (.mod (.multiply d d) modulus) 
+                 v (.mod (.multiply d v) modulus) 
+                 w (.mod (.multiply w y) modulus)] 
+             (recur y k v w))))) 
+
+     :else 
+     (throw (ex-info "Cannot compute a square root for a non-prime modulus" 
+                     {:argument n, 
+                      :modulus  modulus})))))) 
+\end{verbatim}
+
+(defn pad-to-length ``Left-pads string s to length len with zeroes.''
+{[}s len{]} (let {[}pad-len (- len (count s)){]} (if (pos? pad-len)
+(str/join (concat (repeat pad-len \textbackslash0) s)) s)))
+
+(defn compute-point ``Compute an elliptic curve point for a y-coordinate
+parity and x-coordinate'' {[}y-even? x-coordinate \^{}ECDomainParameters
+curve{]} \#?(:clj (let {[}l (-\textgreater{} curve .getN .bitLength (/
+8)) raw (-\textgreater\textgreater{} x-coordinate biginteger
+.toByteArray) input (cond (= l (count raw)) raw (\textless{} l (count
+raw)) (drop-while zero? raw) (\textgreater{} l (count raw)) (let {[}out
+(byte-array l){]} (System/arraycopy raw 0 out (- l (count raw)) (count
+raw))
+
+\begin{verbatim}
+                                       out))] 
+   (-> (cons (if y-even? 0x02 0x03) input) 
+       byte-array 
+       alphabase/bytes->hex 
+       (pad-to-length 64))) 
+
+ :cljs 
+ (let [modulus     (-> curve .-field .-modulus) 
+       ; √(x * (a + x**2) + b) % p 
+       y-candidate (modular-square-root 
+                     (.add 
+                       (.mul x-coordinate (.add (.-a curve) (.square x-coordinate))) 
+                       (.-b curve)) 
+                     modulus) 
+       y           (if (= y-even? (bn-even? y-candidate)) 
+                     y-candidate 
+                     (.sub modulus y-candidate))] 
+   #js {:x (sjcl/bn. x-coordinate) 
+        :y (sjcl/bn. y)}))) 
+\end{verbatim}
+
+;; X92.61 encode / decode
+
+(defn- x962-hex-compressed-decode {[}encoded-key \^{}ECDomainParameters
+curve{]} \#?(:cljs (let {[}x (-\textgreater{} (subs encoded-key 2)
+hex-\textgreater biginteger) y-even? (= (subs encoded-key 0 2)
+``02''){]} (compute-point y-even? x curve)) :clj (let {[}point
+(.decodePoint (.getCurve curve) (alphabase/base-to-byte-array
+encoded-key :hex)) x (-\textgreater{} point .getXCoord .toBigInteger) y
+(-\textgreater{} point .getYCoord .toBigInteger){]} (-\textgreater{}
+curve .getCurve (.createPoint x y) .normalize))))
+
+(defn- x962-hex-uncompressed-decode ``Decode a hex encoded public key
+into x and y coordinates as bytes.'' {[}encoded-key
+\^{}ECDomainParameters curve{]} (let {[}size (- (count encoded-key) 2)
+;; first hex byte is 0x04, rest is x and y coords x (subs encoded-key 2
+(+ 2 size)) y (subs encoded-key (+ 2 size)){]}
+
+\begin{verbatim}
+#?(:clj  (-> curve .getCurve (.createPoint x y) .normalize) 
+   :cljs #js {:x (.initWith (sjcl/bn.) x) 
+              :y (.initWith (sjcl/bn.) y)}))) 
+\end{verbatim}
+
+(defn x962-decode ``Decode a X9.62 encoded public key from hex''
+\^{}ECPoint {[}public-key curve{]} (when-not (\#\{``02'' ``03'' ``04''\}
+(subs public-key 0 2)) (throw (ex-info ``X9.62 encoded public key must
+have a first byte of 0x02, 0x03 or 0x04.'' \{:public-key public-key\})))
+(cond (\#\{``02'' ``03''\} (subs public-key 0 2))
+(x962-hex-compressed-decode public-key curve)
+
+\begin{verbatim}
+(= "04" (subs public-key 0 2)) 
+(x962-hex-uncompressed-decode public-key curve) 
+
+:else 
+(throw (ex-info "Invalid encoding on public key" 
+                {:encoded-key public-key})))) 
+\end{verbatim}
+
+(defn x962-encode ``Encodes x and y coords in hex to X9.62 with optional
+compression (default true). x coords and y coords should be supplied in
+hex format.'' ({[}x-coord y-coord{]} (x962-encode x-coord y-coord true))
+({[}\^{}String x-coord \^{}String y-coord compressed?{]} (if-not
+compressed? (str ``04'' (pad-hex x-coord) (pad-hex y-coord)) (let
+{[}y-even? \#?(:clj (let {[}y-bi (BigInteger. y-coord 16){]} (even?
+y-bi)) :cljs (-\textgreater{} (sjcl/bn.) (.initWith y-coord)
+(bn-even?))){]} (if y-even? (str ``02'' (pad-to-length (pad-hex x-coord)
+64)) (str ``03'' (pad-to-length (pad-hex x-coord) 64)))))))
+
+;; DER encode / decode
+
+(defn- DER-decode-standard ``Decodes an ordinary encoded list of numbers
+from a hexadecimal following the distinguished encoding rules. Returns R
+and S as bigintegers (clj).'' {[}asn1{]} (assert (= ``30'' (subs asn1 0
+2)), ``Input must start with the code 30'') \#?(:clj (let {[}\^{}bytes
+signature (alphabase/base-to-byte-array asn1 :hex){]} (with-open
+{[}decoder (ASN1InputStream. signature){]} (let {[}\^{}ASN1Sequence
+sequence (.readObject decoder){]} {[}(-\textgreater{} sequence
+\^{}ASN1Integer (.getObjectAt 0) .getValue) (-\textgreater{} sequence
+\^{}ASN1Integer (.getObjectAt 1) .getValue){]}))) :cljs (let {[}\{:keys
+{[}length remaining{]}\} (asn1/decode-asn1-length (subs asn1 2)){]}
+(when-not (= (* length 2) (count remaining)) (throw (ex-info ``Decoded
+header length does not match actual length of message''
+\{:decoded-header-length (* 2 length) :actual-length (count remaining)
+:message remaining :full-asn1 asn1\}))) (loop {[}ret {[}{]}, remaining
+remaining{]} (if (empty? remaining) (mapv hex-\textgreater biginteger
+ret) (let {[}\{:keys {[}integer remaining{]}\} (asn1/decode-asn1-integer
+remaining){]} (recur (conj ret integer) remaining)))))))
+
+(defn DER-decode ``Decodes a list of numbers including an optional
+recovery byte, following BitCoin's convention'' {[}asn1{]} (let {[}asn1
+(str/lower-case asn1) first-byte (subs asn1 0 2){]} (cond (\#\{``1b''
+``1c'' ``1d'' ``1e''\} first-byte) ;; recovery bytes (-\textgreater{}
+(conj (DER-decode-standard (subs asn1 2)) (-\textgreater{}
+(alphabase/hex-\textgreater bytes first-byte) byte-\textgreater int)))
+
+\begin{verbatim}
+  (= "30" first-byte) 
+  (DER-decode-standard asn1) 
+
+  :else 
+  (throw (ex-info "Input must start with the code 30, or start with a recovery code (either 1b, 1c, 1d, or 1e)" 
+                  {:argument asn1}))))) 
+\end{verbatim}
+
+(defn DER-decode-ECDSA-signature ``Formats an ECDSA signature from hex.
+Returns R, S and recover as hex values.'' {[}ecdsa{]} (let {[}{[}R S
+recover{]} (DER-decode ecdsa){]} \{:R R :S S :recover recover\}))
+
+;; TODO - should be able to take biginteger/bignumber, convert to bytes,
+then ;; TODO - use a common clojure/script ASN1 capability (started in
+fluree.crypto.asn1.cljs) (defn DER-encode-ECDSA-signature ``Create a DER
+encoded signature. Both R and S should be bigintegers (clj) /bignumbers
+(cljs). recover should also be biginteger'' {[}\^{}BigInteger R
+\^{}BigInteger S recover curve{]} \#?(:cljs (let {[}l (-\textgreater{}
+curve .-r .bitLength) R-hex (-\textgreater{} R (.toBits l)
+sjcl/codec.hex.fromBits) S-hex (-\textgreater{} S (.toBits l)
+sjcl/codec.hex.fromBits) recover-hex (.toString recover 16) R-asn1
+(asn1/encode-asn1-unsigned-integer-hex R-hex) S-asn1
+(asn1/encode-asn1-unsigned-integer-hex S-hex){]}
+(-\textgreater\textgreater{} (str R-asn1 S-asn1)
+(asn1/encode-asn1-unsigned-integer-hex) (\#(subs \% 2)) (str recover-hex
+``30'') alphabase/hex-\textgreater bytes)) :clj (let {[}bos
+(ByteArrayOutputStream.){]} (with-open {[}der-gen (DERSequenceGenerator.
+bos){]} (doto der-gen (.addObject (ASN1Integer. R)) (.addObject
+(ASN1Integer. S)))) (let {[}result (.toByteArray bos){]} (if (nil?
+recover) result (byte-array (cons recover result)))))))
+
+\subsection{hmac.cljc}\label{hmac.cljc}
+
+(ns fluree.crypto.hmac \#?(:cljs (:require {[}``@fluree/sjcl'' :as
+sjcl{]})) \#?(:clj (:import (org.bouncycastle.crypto.macs HMac)
+(org.bouncycastle.crypto.params KeyParameter)
+(org.bouncycastle.crypto.digests SHA256Digest))))
+
+\#?(:clj (set! \emph{warn-on-reflection} true))
+
+(defn hmac-sha256 ``Returns HMAC using SHA-256 hashing. Both key and
+message should be bytes.'' {[}\^{}bytes message \^{}bytes key{]}
+\#?(:clj (let {[}hmac (HMac. (SHA256Digest.)) k (KeyParameter. key)
+result (byte-array (.getMacSize hmac)){]} (.init hmac k) (.update hmac
+message 0 (alength message)) (.doFinal hmac result 0) result) :cljs (let
+{[}hmac (sjcl/misc.hmac. (sjcl/codec.bytes.toBits key)) message-bits
+(sjcl/codec.bytes.toBits message){]} (-\textgreater{} hmac (.encrypt
+message-bits) (sjcl/codec.bytes.fromBits)))))
+
+\subsection{jws.cljc}\label{jws.cljc}
+
+(ns fluree.crypto.jws ``An implementation of
+\url{https://datatracker.ietf.org/doc/html/rfc7515}'' (:require
+{[}alphabase.core :as alphabase{]} {[}clojure.string :as str{]}
+{[}fluree.crypto.secp256k1 :as secp256k1{]}))
+
+(def JOSE-header ``The JOSE header for a secp256k1 signing key.
+\url{https://github.com/decentralized-identity/EcdsaSecp256k1RecoverySignature2020}''
+``\{"alg":"ES256K-R","b64":false,"crit":{[}"b64"{]}\}'')
+
+(defn b64 ``Convert to base64url and remove the trailing padding (=).''
+{[}s{]} (-\textgreater{} s (alphabase/base-to-base :string :base64url)
+(str/replace ``='' ``\,``)))
+
+(defn sign {[}signing-input signing-key{]} (secp256k1/sign signing-input
+signing-key))
+
+(defn serialize-jws ``Create a JWS Compact Serialization of a JSON Web
+Signature.'' {[}payload signing-key{]} (let {[}b64-header (b64
+JOSE-header) b64-payload (b64 payload) b64-sig (b64 (sign (str
+b64-header ``.'' b64-payload) signing-key)){]} (str b64-header ``.''
+b64-payload ``.'' b64-sig)))
+
+(defn deserialize-jws ``Deserialize a compact JWS into its component
+parts'' {[}jws{]} (let {[}{[}header payload sig{]} (str/split jws
+\#``.''){]} \{:header (alphabase/base-to-base header :base64url :string)
+:payload (alphabase/base-to-base payload :base64url :string) :signature
+(alphabase/base-to-base sig :base64url :hex)\}))
+
+(defn verify {[}jws{]} (when (string? jws) (let {[}{[}b64-header
+b64-payload b64-sig{]} (str/split jws \#``.'')
+
+\begin{verbatim}
+      header  (alphabase/base-to-base b64-header :base64url :string) 
+      payload (alphabase/base-to-base b64-payload :base64url :string) 
+      sig     (alphabase/base-to-base b64-sig :base64url :string) 
+
+      signing-input (str b64-header "." b64-payload) 
+      pubkey        (secp256k1/recover-public-key signing-input sig)] 
+  (when (not= header JOSE-header) 
+    (throw (ex-info "Unsupported JWS header." 
+                    {:error :jws/unknown-signing-algorithm 
+                     :supported-header JOSE-header 
+                     :header header 
+                     :jws jws}))) 
+  (when (not (secp256k1/verify pubkey signing-input sig)) 
+    (throw (ex-info "JWS verification failed." {:error :jws/invalid-signature 
+                                                :jws jws}))) 
+  {:payload payload :pubkey pubkey}))) 
+\end{verbatim}
+
+(comment (b64 ``\{"typ":"JWT","alg":"ES256K-R"\}'')
+``eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9''
+
+(b64
+``\{"iss":"joe","exp":1300819380,"\url{http://example.com/is_root/}'':true\}``)''eyJpc3MiOiJqb2UiLCJleHAiOjEzMDA4MTkzODAsImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ''
+
+(b64
+``83b3bec44b9cf25bb6c4bc81a283cf415e744588aec107c31c91d160845f7b92'')
+``ODNiM2JlYzQ0YjljZjI1YmI2YzRiYzgxYTI4M2NmNDE1ZTc0NDU4OGFlYzEwN2MzMWM5MWQxNjA4NDVmN2I5Mg''
+
+(alphabase/base-to-base
+``MWMzMDQ0MDIyMDBmNjk3YTAyNDAxMmVmZDUzYTg2Njk2NTEwMWQwNmIxODllOGUxYzY1OTcwMGIwNjczYTFiYTk4MjEwZGU0ZmMwMjIwNDQyOGJiOGIzNmRmNDg1NGEyOWZkMTBlMmUxMWM5MzQ2MDZiNDgyMjRjMGMzNmY2ZDc0YzNhZGZhYTA0MGZmZA''
+:base64url :string)
+``1c304402200f697a024012efd53a866965101d06b189e8e1c659700b0673a1ba98210de4fc02204428bb8b36df4854a29fd10e2e11c934606b48224c0c36f6d74c3adfaa040ffd''
+
+(serialize-jws ``\{"hello":"there"\}''
+``659a50e1be866d402c6f8175c22af38a1b4fe2ec510dcc50f5babfea5b35933f'')
+``eyJhbGciOiJFUzI1NkstUiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19.eyJoZWxsbyI6InRoZXJlIn0.MWMzMDQ0MDIyMDMwYTBkN2JjM2NmYTU0ZWZhZmZkZjdlMTU0MTZiNzE5OWMxZDFkMWQ2NmRhOTQxODg3ZDAwZWE1YjUxNGZjZDgwMjIwNmQ2OTYwOWFlODNiODQ4OGI3MDRiNzczODkxZGRiNTVlMDM3NzQwNjE0NWJjNTBiYjlmN2UxYmMxMTI5ZWQ0Mw''
+
+(verify
+``eyJhbGciOiJFUzI1NkstUiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19.eyJoZWxsbyI6InRoZXJlIn0.MWMzMDQ0MDIyMDMwYTBkN2JjM2NmYTU0ZWZhZmZkZjdlMTU0MTZiNzE5OWMxZDFkMWQ2NmRhOTQxODg3ZDAwZWE1YjUxNGZjZDgwMjIwNmQ2OTYwOWFlODNiODQ4OGI3MDRiNzczODkxZGRiNTVlMDM3NzQwNjE0NWJjNTBiYjlmN2UxYmMxMTI5ZWQ0Mw'')
+
+``eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NkstUiJ9.eyJoZWxsbyI6InRoZXJlIn0.MWMzMDQ0MDIyMDBmNjk3YTAyNDAxMmVmZDUzYTg2Njk2NTEwMWQwNmIxODllOGUxYzY1OTcwMGIwNjczYTFiYTk4MjEwZGU0ZmMwMjIwNDQyOGJiOGIzNmRmNDg1NGEyOWZkMTBlMmUxMWM5MzQ2MDZiNDgyMjRjMGMzNmY2ZDc0YzNhZGZhYTA0MGZmZA''
+
+;; header; ``alg'' ``ES256K'' ``jwk'' ``pubkey as jwk'' ``typ'' ``JOSE''
+; indicates compact serialization ``typ'' ``JOSE+JSON'' ; indicates JSON
+serialization )
+
+\subsection{ripemd.cljc}\label{ripemd.cljc}
+
+(ns fluree.crypto.ripemd (:require {[}alphabase.core :as alphabase{]}
+\#?@(:cljs {[}{[}``@fluree/sjcl'' :as sjcl{]}{]})) \#?(:clj (:import
+(org.bouncycastle.crypto.digests RIPEMD160Digest))))
+
+\#?(:clj (set! \emph{warn-on-reflection} true))
+
+(defn ripemd-160 ``Creates a ripemd-160 hash from byte input.'' {[}ba{]}
+\#?(:cljs (-\textgreater{} ba sjcl/codec.bytes.toBits
+sjcl/hash.ripemd160.hash sjcl/codec.bytes.fromBits) :clj (let {[}d
+(RIPEMD160Digest.) \_ (.update d ba 0 (count ba)) o (byte-array
+(.getDigestSize d)){]} (.doFinal d o 0) o)))
+
+(comment
+
+(in-ns 'fluree.crypto.ripemd)
+
+(ripemd-160 (alphabase/string-\textgreater bytes ``hi''))
+
+(= ``ad6ce46f7f1ea8519dc02ce8ce0c278c6ff329b2''
+(alphabase/bytes-\textgreater hex (ripemd-160 (.getBytes ``hi
+there!'')))))
+
+\subsection{scrypt.cljc}\label{scrypt.cljc}
+
+(ns fluree.crypto.scrypt (:require {[}alphabase.core :as alphabase{]}
+\#?@(:cljs {[}{[}``@fluree/sjcl'' :as sjcl{]} {[}goog.object{]}{]}))
+\#?(:clj (:import (com.lambdaworks.crypto SCryptUtil)
+(com.lambdaworks.crypto SCrypt) (java.security SecureRandom))))
+
+\#?(:clj (set! \emph{warn-on-reflection} true))
+
+(defn random-bytes ``Returns a random byte array of the specified size.
+NOTE: This will only work in the browser, not for node.js'' {[}size{]}
+(let {[}seed \#?(:clj (byte-array size) :cljs (js/Uint8Array. size)){]}
+\#?(:clj (.nextBytes (SecureRandom.) seed) :cljs
+(js/window.crypto.getRandomValues seed)) seed))
+
+(defn encrypt ``Encrypts message (bytes) using salt (bytes). Returns
+encrypted message in bytes directly.
+
+Note verification of message will require the identical salt, n, r, p
+used by the original encryption.'' ({[}raw{]} (encrypt raw (random-bytes
+16))) ({[}raw salt{]} (encrypt raw salt 32768)) ({[}raw salt n{]}
+(encrypt raw salt n 8 1)) ({[}raw salt n r p{]} (encrypt raw salt n r p
+32)) ({[}raw salt n r p dk-len{]} \#?(:clj (SCrypt/scrypt raw salt n r p
+dk-len) :cljs (let {[}rawBits (sjcl/codec.bytes.toBits raw) saltBits
+(sjcl/codec.bytes.toBits salt) length (* 8 dk-len) res
+(sjcl/crypt.scrypt. rawBits saltBits n r p length){]}
+(sjcl/codec.bytes.fromBits res)))))
+
+(defn check ``Compare raw message (bytes) with previously encrypted
+(bytes) that was encrypted with the provided salt, n, r and p.~ Returns
+true or false.'' ({[}raw encrypted salt{]} (check raw encrypted salt
+32768 8 1)) ({[}raw encrypted salt n r p{]} (let {[}dk-len \#?(:clj
+(count encrypted) :cljs (.-length encrypted)) is-valid? (fn {[}encrypted
+test{]} \#?(:clj (= (seq encrypted) (seq test)) :cljs (.equals
+goog.object encrypted test))) to-test (encrypt raw salt n r p dk-len){]}
+(is-valid? encrypted to-test))))
+
+(comment
+
+(in-ns 'fluree.crypto.scrypt)
+
+(def message (alphabase/string-\textgreater bytes ``hi''))
+
+(def salt-bytes {[}-84 28 -14 108 -81 -126 -42 6 -7 61 -12 -78 34 8 13
+-78{]}) (def mysalt \#?(:cljs (clj-\textgreater js (map \#(if (neg-int?
+\%) (+ \% 256) \%) salt-bytes)) :clj (byte-array salt-bytes)))
+
+(def result (encrypt message mysalt)) (def res-hex
+(alphabase/byte-array-to-base result :hex)) res-hex
+
+;57f93bcf926c31a9e2d2129da84bfca51eb9447dfe1749b62598feacaad657d4
+
+(check message result mysalt))
+
+\subsection{secp256k1.cljc}\label{secp256k1.cljc}
+
+(ns fluree.crypto.secp256k1 (:require {[}alphabase.core :as alphabase{]}
+{[}fluree.crypto.hmac :as hmac{]} {[}fluree.crypto.sha2 :as sha2{]}
+{[}fluree.crypto.ripemd :as ripemd{]} {[}fluree.crypto.encodings :as
+encodings{]} \#?@(:cljs {[}{[}``@fluree/sjcl'' :as sjcl{]}
+{[}goog.object :as gobj{]} {[}fluree.crypto.bn :as bn{]}{]})
+{[}fluree.crypto.ripemd :as ripemd{]})
+
+\#?(:clj (:import (java.io ByteArrayOutputStream) (java.security
+SecureRandom) (clojure.lang Reflector)
+(org.bouncycastle.crypto.generators ECKeyPairGenerator)
+(org.bouncycastle.crypto.params ECKeyGenerationParameters
+ECDomainParameters ECPrivateKeyParameters) (org.bouncycastle.asn1.sec
+SECNamedCurves) (org.bouncycastle.crypto.signers HMacDSAKCalculator)
+(org.bouncycastle.crypto.digests SHA256Digest) (org.bouncycastle.asn1
+DERSequenceGenerator) (org.bouncycastle.asn1 ASN1Integer)
+(org.bouncycastle.math.ec ECAlgorithms ECPoint))))
+
+\#?(:clj (set! \emph{warn-on-reflection} true))
+
+(defonce \^{}:private \^{}ECDomainParameters secp256k1 \#?(:cljs (..
+sjcl -ecc -curves -k256) :clj (let {[}params (SECNamedCurves/getByName
+``secp256k1''){]} (ECDomainParameters. (.getCurve params) (.getG params)
+(.getN params) (.getH params)))))
+
+(defonce modulus \#?(:clj (.getN secp256k1) :cljs (.-r secp256k1)))
+
+(defn valid-private? ``Returns true if private key, as big
+number/integer, is valid. Private key must be \textgreater= 1 and
+\textless= curve modulus.'' {[}private{]} \#?(:clj (and (\textless= 1
+private) (\textless= private modulus)) :cljs (and (bn/\textgreater=
+private 1) (bn/\textgreater= modulus private))))
+
+(defn format-public-key ``Takes internal representation of a public key
+and returns X9.62 compressed encoded public key, hex encoded.''
+{[}\^{}ECPoint public{]} (let {[}x \#?(:clj (-\textgreater{} public
+.getAffineXCoord .toBigInteger (.toString 16)) :cljs (-\textgreater{}
+public .-x .toString (.replace \#``\^{}0x'' ````) encodings/pad-hex)) y
+\#?(:clj (-\textgreater{} public .getAffineYCoord .toBigInteger
+(.toString 16)) :cljs (-\textgreater{} public .-y .toString (.replace
+\#''\^{}0x'' ``\,``) encodings/pad-hex)){]} (encodings/x962-encode x
+y)))
+
+(defn format-key-pair ``Takes internal representation of a key-pair and
+returns X9.62 compressed encoded public key and private key as a map,
+with each value hex encoded.'' {[}pair{]} (let {[}private (:private
+pair) \^{}ECPoint public (:public pair) x \#?(:clj (-\textgreater{}
+public .getAffineXCoord .toBigInteger (.toString 16)
+(encodings/pad-to-length 64)) :cljs (-\textgreater{} public (gobj/get
+``x'') .toString (.replace \#``\^{}0x'' ````) encodings/pad-hex)) y
+\#?(:clj (-\textgreater{} public .getAffineYCoord .toBigInteger
+(.toString 16)) :cljs (-\textgreater{} public (gobj/get''y'') .toString
+(.replace \#``\^{}0x'' ``\,``) encodings/pad-hex)){]} \{:private
+(encodings/biginteger-\textgreater hex private) :public
+(encodings/x962-encode x y)\}))
+
+(defn public-key-from-private {[}private{]} (let {[}private-bn \#?(:clj
+(cond (instance? BigInteger private) private (string? private)
+(BigInteger. \^{}String private 16)) :cljs (sjcl/bn. private)){]}
+(when-not (valid-private? private-bn) (throw (ex-info ``Invalid private
+key. Must be big integer and \textgreater= 1, \textless= curve
+modulus.'' \{:private private\}))) \{:private private-bn :public
+\#?(:clj (-\textgreater{} secp256k1 .getG (.multiply private-bn)
+.normalize) :cljs (.mult (.-G secp256k1) private-bn))\}))
+
+(defn- pub-key-\textgreater bytes {[}pub-key{]} \#?(:clj
+(-\textgreater{} pub-key (encodings/x962-decode secp256k1) (.getEncoded
+true) (alphabase/byte-array-to-base :bytes)) :cljs
+(alphabase/hex-\textgreater bytes pub-key)))
+
+(defn- -\textgreater byte-array {[}bytes{]} \#?(:clj (byte-array bytes)
+:cljs (clj-\textgreater js bytes)))
+
+(defn get-sin-from-public-key ``Generate a SIN from a public key''
+{[}pub-key \& \{:keys {[}output-format{]} :or \{output-format
+:base58\}\}{]} (let {[}pub-prefixed (-\textgreater{} pub-key
+pub-key-\textgreater bytes sha2/sha2-256 ripemd/ripemd-160 ;;; What is
+this 15 and 2? Version? (-\textgreater\textgreater{} (concat {[}0x0F
+0x02{]})) -\textgreater byte-array) checksum (-\textgreater{}
+pub-prefixed sha2/sha2-256 sha2/sha2-256 (-\textgreater\textgreater{}
+(take 4))) bytes (concat pub-prefixed checksum) ba
+(-\textgreater byte-array bytes){]} (alphabase/byte-array-to-base ba
+output-format)))
+
+(defn \^{}:export new-private-key ``Generates a new random private
+key.'' {[}{]} \#?(:clj (let {[}gen (doto (ECKeyPairGenerator.) (.init
+(ECKeyGenerationParameters. secp256k1 (SecureRandom.)))) keypair
+(.generateKeyPair gen) \^{}ECPrivateKeyParameters private (.getPrivate
+keypair){]} (.getD private)) :cljs (-\textgreater{}
+(sjcl/ecc.ecdsa.generateKeys secp256k1) (gobj/get ``sec'') (.get)
+(sjcl/bn.))))
+
+(defn generate-key-pair* ``Generates an internal representation of key
+pair from a secure random seed or provided private key. Returns
+map/object with two keys: - private - a big number/integer - public - a
+curve point
+
+If a private key is provided, must be in either hex string or BigInteger
+(clj) bignumber (cljs).'' ({[}{]} (generate-key-pair*
+(new-private-key))) ({[}private{]} (public-key-from-private private)))
+
+(defn \^{}:export generate-key-pair ``Returns key pair in hex format
+using X9.62 compressed encoding for public key.'' ({[}{]}
+(format-key-pair (generate-key-pair\emph{))) ({[}private{]}
+(format-key-pair (generate-key-pair} private))))
+
+;; adapted from \url{https://github.com/Sepia-Officinalis/secp256k1}
+(defn deterministic-generate-k ``Deterministically generate a random
+number in accordance with RFC 6979. Provided hash should have 256 bits
+to align with secp256k1 curve.'' \^{}HMacDSAKCalculator {[}hash-ba
+priv-key \^{}ECDomainParameters curve{]} \#?(:clj (do (assert (= (count
+hash-ba) (-\textgreater{} curve .getN .bitLength (/ 8))) ``Hash should
+have the same number of bytes as the curve'') (doto (HMacDSAKCalculator.
+(SHA256Digest.)) (.init (.getN curve) priv-key hash-ba))) :cljs (let
+{[}l (-\textgreater{} curve .-r .bitLength) curve-bytes (/ l 8) v
+(repeat curve-bytes 0x01) k (repeat curve-bytes 0x00) pk
+(encodings/biginteger-\textgreater bytes priv-key) left-padding (repeat
+(- curve-bytes (count hash-ba)) 0) hash (concat left-padding hash-ba) k
+(hmac/hmac-sha256 (concat v {[}0{]} pk hash) k) v (hmac/hmac-sha256 v k)
+k (hmac/hmac-sha256 (concat v {[}1{]} pk hash) k) v (hmac/hmac-sha256 v
+k){]} (assert (= (count hash) curve-bytes) ``Hash should have the same
+number of bytes as the curve modulus'') (-\textgreater{}
+(hmac/hmac-sha256 v k) encodings/bytes-\textgreater biginteger))))
+
+(defn- compute-recovery-byte ``Compute a recovery byte for a compressed
+ECDSA signature given R and S parameters. Returns value as byte
+integer.'' {[}\^{}ECPoint kp r s{]} \#?(:clj (let {[}n (.getN secp256k1)
+big-r? (\textgreater= r n) big-s? (\textgreater= (+ s s) n) y-odd?
+(-\textgreater{} kp .getYCoord .toBigInteger (.testBit 0)){]}
+(-\textgreater{} 0x1B (+ (if (not= big-s? y-odd?) 1 0)) (+ (if big-r? 2
+0))))
+
+\begin{verbatim}
+ :cljs (let [n      (.-r secp256k1) 
+             big-r? (bn/>= r n) 
+             big-s? (bn/>= (.add s s) n) 
+             y-odd? (-> kp .-y encodings/bn-even? not)] 
+         (-> 0x1B 
+             (+ (if (not= big-s? y-odd?) 1 0)) 
+             (+ (if big-r? 2 0)))))) 
+\end{verbatim}
+
+(defn \^{}:export sign-hash {[}\^{}bytes hash-ba private-bn
+recovery-byte?{]} (let {[}rng (deterministic-generate-k hash-ba
+private-bn secp256k1) n \#?(:clj (.getN secp256k1) :cljs (.-r
+secp256k1)) z \#?(:clj (BigInteger. 1 hash-ba) :cljs (-\textgreater{}
+hash-ba sjcl/codec.bytes.toBits sjcl/bn.)) l (.bitLength n) \_ (assert
+(= (count hash-ba) (/ l 8)) ``Hash should have the same number of bytes
+as the curve modulus'') {[}r s s\_ kp{]} \#?(:clj (loop {[}{]} (let {[}k
+(.nextK rng) \^{}ECPoint kp (-\textgreater{} secp256k1 .getG (.multiply
+k) .normalize) r (-\textgreater{} kp .getXCoord .toBigInteger (.mod n))
+s\_ (-\textgreater{} k (.modInverse n) (.multiply (-\textgreater{} r
+(.multiply private-bn) (.add z))) (.mod n)) s (if (\textless{} (+ s\_
+s\_) n) s\_ (.subtract n s\_)){]} (if (or (zero? r) (zero? s)) (recur)
+{[}r s s\_ kp{]}))) :cljs (let {[}k rng kp (-\textgreater{} secp256k1
+.-G (.mult k)) r (-\textgreater{} kp .-x (.mod n)) s\_ (-\textgreater{}
+(.mul r private-bn) (.add z) (.mul (.inverseMod k n)) (.mod n)) s\_+s\_
+(.add s\_ s\_) ge? (bn/\textgreater= s\_+s\_ n) s (if ge? (.sub n s\_)
+s\_){]} {[}r s s\_ kp{]})) recovery-byte (when recovery-byte?
+(compute-recovery-byte kp r s\_)){]} (let {[}der-sig
+(encodings/DER-encode-ECDSA-signature r s recovery-byte secp256k1){]} ;
+TODO: The DER fn converts hex to bytes and then we convert bytes back to
+hex here. ; Can we optimize that a bit?
+(alphabase/bytes-\textgreater hex der-sig))))
+
+(defn \^{}:export sign ``Sign some message with provided private key.
+Message must be a byte-array or string. Private key must be hex-encoded
+or a BigInteger(clj)/bignumber(cljs).'' {[}message private-key{]} (let
+{[}msg-ba (if (string? message) (alphabase/string-\textgreater bytes
+message) message) private-bn (if (string? private-key)
+(encodings/hex-\textgreater biginteger private-key) private-key) hash
+(sha2/sha2-256 msg-ba){]} (sign-hash hash private-bn true)))
+
+(defn ecrecover ``Given the components of a signature and a recovery
+value, recover and return the public key that generated the signature
+according to the algorithm in SEC1v2 section 4.1.6
+
+recovery-byte should be an integer byte.'' {[}\^{}bytes hash
+recovery-byte \^{}BigInteger r \^{}BigInteger s{]} (assert (and (number?
+recovery-byte) (\textless= 0x1B recovery-byte) (\textless= recovery-byte
+0x1E)) (str ``Recovery byte should be between 0x1B and 0x1E. Provided:''
+\#?(:cljs (.toString recovery-byte 16) :clj (format ``\%x''
+recovery-byte)))) (let {[}l \#?(:clj (-\textgreater{} secp256k1 .getN
+.bitLength (/ 8)) :cljs (-\textgreater{} secp256k1 .-r .bitLength (/
+8))) \_ (assert (= l (count hash)) (str ``Hash should have'' l '' bytes,
+but had '' (count hash) ``.'')) y-even? (even? (- recovery-byte 0x1B))
+is-second-key? (odd? (-\textgreater{} recovery-byte (- 0x1B)
+(bit-shift-right 1))) n \#?(:clj (.getN secp256k1) :cljs (.-r
+secp256k1)) point (encodings/compute-point y-even? (if is-second-key?
+(.add r n) r) secp256k1) R \#?(:cljs point :clj (encodings/x962-decode
+point secp256k1)) r-inv \#?(:clj (.modInverse r n) :cljs (.inverseMod r
+n)) hash-bi \#?(:clj (BigInteger. 1 hash) :cljs
+(encodings/bytes-\textgreater biginteger hash)) e-inv \#?(:clj
+(.subtract n hash-bi) :cljs (.sub n hash-bi)){]} \#?(:clj
+(-\textgreater{} (ECAlgorithms/sumOfTwoMultiplies (.getG secp256k1)
+e-inv R s) (.multiply r-inv) .normalize format-public-key) :cljs (let
+{[}G (.-G secp256k1) g-point (sjcl/ecc.point. secp256k1 (.-x G) (.-y G))
+r-point (sjcl/ecc.point. secp256k1 (.-x R) (.-y R)) sumOTM (.mult2
+r-point s e-inv g-point) sumPoint (sjcl/ecc.point. secp256k1 (.-x
+sumOTM) (.-y sumOTM)){]} (-\textgreater{} (.mult sumPoint r-inv)
+format-public-key)))))
+
+(defn recover-public-key-from-hash ``Recover a public key from a hash
+byte-array and signature (hex).'' {[}hash signature{]} (let {[}\{:keys
+{[}recover R S{]}\} (encodings/DER-decode-ECDSA-signature signature)
+recover (int recover){]} (ecrecover hash recover R S)))
+
+(defn recover-public-key ``Recover a public key from original message
+and signature (hex) of the message's sha2-256 hash.'' {[}input
+signature{]} (let {[}hash (sha2/sha2-256 (if (string? input)
+(alphabase/string-\textgreater bytes input) input)){]}
+(recover-public-key-from-hash hash signature)))
+
+(defn verify-signature-from-hash {[}key hash signature{]} (let {[}head1
+(subs signature 0 2) head2 (subs signature 2 4){]} (cond (and
+(\#\{``1b'' ``1c'' ``1d'' ``1e''\} head1) (= ``30'' head2)) (= key
+(recover-public-key-from-hash hash signature))
+
+\begin{verbatim}
+      ;(= head1 0x30) 
+      ;(verify-ECDSA-signature-from-hash pub-key input sig-bytes) 
+
+      :else 
+      (throw (ex-info "Unknown signature header" 
+                      {:key       key 
+                       :hash      hash 
+                       :signature signature}))))) 
+\end{verbatim}
+
+(defn \^{}:export verify ``Verifies a message given a signature (in
+hex). Assumes signature is DER-encoded with a recovery byte.''
+{[}pub-key message signature{]} (let {[}hash (sha2/sha2-256
+(alphabase/string-\textgreater bytes message)){]}
+(verify-signature-from-hash pub-key hash signature)))
+
+(comment
+
+(verify
+``035813c81e39b231b586f48e98bcfe6c0a71bdb17e2fa907463339ab1a9fb5e4a5''
+``hi''
+``1c3045022100e81841ed32ed8c36e31dfa671cb21c1d9bdd6b581ea699b62d4201445e3fe2ea02200473ef2d72258029dae899ece3846c5e06190ce27ca3f289bf8a5cf43ef02c68''))
+
+\subsection{sha2.cljc}\label{sha2.cljc}
+
+(ns fluree.crypto.sha2 (:refer-clojure :exclude {[}hash{]}) \#?(:cljs
+(:require {[}goog.crypt.Sha256{]} {[}goog.crypt.Sha512{]})) \#?(:clj
+(:import (java.security MessageDigest))))
+
+\#?(:clj (set! \emph{warn-on-reflection} true))
+
+(defn- hash {[}ba \^{}long hash-size{]} (assert (\#\{256 512\}
+hash-size)) (let {[}digest (case hash-size 256 \#?(:clj
+(MessageDigest/getInstance ``SHA-256'') :cljs (doto (goog.crypt.Sha256.)
+(.update ba))) 512 \#?(:clj (MessageDigest/getInstance ``SHA-512'')
+:cljs (doto (goog.crypt.Sha512.) (.update ba)))){]} \#?(:clj (.digest
+digest ba) :cljs (.digest digest))))
+
+(defn \^{}:export sha2-256 ``Create a sha2 hash from byte-array.''
+{[}ba{]} (hash ba 256))
+
+(defn \^{}:export sha2-512 ``Create a sha2 hash from byte-array.''
+{[}ba{]} (hash ba 512))
+
+\subsection{sha3.cljc}\label{sha3.cljc}
+
+(ns fluree.crypto.sha3 (:refer-clojure :exclude {[}hash{]}) (:require
+{[}alphabase.core :as alphabase{]} \#?@(:cljs {[}{[}``js-sha3'' :as
+js-sha3{]}{]})) \#?(:clj (:import (org.bouncycastle.crypto.digests
+RIPEMD160Digest SHA256Digest SHA3Digest GeneralDigest))))
+
+\#?(:clj (set! \emph{warn-on-reflection} true))
+
+;; could support other hash sizes besides 256 and 512 with existing code
+(defn \^{}:export hash {[}ba \^{}long hash-size{]} (assert (\#\{256
+512\} hash-size)) \#?(:clj (let {[}digest (doto (SHA3Digest. hash-size)
+(.reset) (.update ba 0 (count ba))){]} (let {[}hash-ba (byte-array
+(.getDigestSize digest)){]} (.doFinal digest hash-ba 0) hash-ba)) :cljs
+(case hash-size 256 (.array js-sha3/sha3\_256 ba) 512 (.array
+js-sha3/sha3\_512 ba))))
+
+(defn \^{}:export sha3-256 ``Create a sha3-256 hash'' {[}ba{]} (hash ba
+256))
+
+(defn \^{}:export sha3-512 ``Create a sha3-512 hash'' {[}ba{]} (hash ba
+512))
+
+\subsection{util.cljc}\label{util.cljc}
+
+(ns fluree.crypto.util (:require {[}fluree.crypto.sha3 :as sha3{]}
+{[}alphabase.core :as alphabase{]}))
+
+\#?(:clj (set! \emph{warn-on-reflection} true))
+
+(defn hash-string-key ``Takes a sha3-512 hash of provided string key and
+returns n bytes.
+
+If the number of bytes is not specified, defaults to 32 bytes.'' {[}key
+n{]} (assert (\textless= n 512)) (let {[}hash-512 (sha3/sha3-512 (if
+(string? key) (alphabase/string-\textgreater bytes key) key)){]}
+\#?(:clj (take n hash-512) :cljs (.slice hash-512 0 n))))
+
+\subsection{crypto.cljc}\label{crypto.cljc}
+
+(ns fluree.crypto (:require {[}alphabase.core :as alphabase{]}
+{[}fluree.crypto.aes :as aes{]} {[}fluree.crypto.jws :as jws{]}
+{[}fluree.crypto.ripemd :as ripemd{]} {[}fluree.crypto.scrypt :as
+scrypt{]} {[}fluree.crypto.secp256k1 :as secp256k1{]}
+{[}fluree.crypto.sha2 :as sha2{]} {[}fluree.crypto.sha3 :as sha3{]}
+\#?@(:cljs {[}{[}goog.crypt :as gcrypt{]} {[}goog.object :as
+gobj{]}{]})) \#?(:clj (:import (java.text Normalizer
+Normalizer\$Form))))
+
+\#?(:clj (set! \emph{warn-on-reflection} true) :cljs (set!
+\emph{warn-on-infer} true))
+
+(defn \^{}:export normalize-string ``Normalizes string for consistent
+hashing.'' {[}\#?(:cljs \^{}js/String s :clj s){]} \#?(:clj
+(Normalizer/normalize s Normalizer\$Form/NFKC) :cljs (.normalize s
+``NFKC'')))
+
+(defn- coerce-input-format ``Does simple check when input format not
+specified. Assumes either string or bytes'' {[}x{]} (if (string? x)
+:string :bytes))
+
+(defn \^{}:export string-\textgreater byte-array ``Normalizes string
+then converts to a byte-array. If value is already a byte-array, returns
+original value.'' {[}s{]} (-\textgreater{} s (normalize-string)
+(alphabase/string-\textgreater bytes)))
+
+(defn \^{}:export byte-array-\textgreater string {[}s{]}
+(-\textgreater{} s (alphabase/bytes-\textgreater string)))
+
+(defn \^{}:export sha2-256 ({[}x{]} (sha2-256 x :hex)) ({[}x
+output-format{]} (sha2-256 x output-format (coerce-input-format x)))
+({[}x output-format input-format{]} (-\textgreater{} x
+(alphabase/base-to-byte-array input-format) sha2/sha2-256
+(alphabase/byte-array-to-base (keyword output-format)))))
+
+(defn \^{}:export sha2-256-normalize ``sha2-256 hash of provided string
+after normalizing string.'' ({[}s{]} (sha2-256-normalize s :hex)) ({[}s
+output-format{]} (-\textgreater{} s normalize-string (sha2-256
+output-format :string))))
+
+(defn \^{}:export sha2-512 ({[}x{]} (sha2-512 x :hex)) ({[}x
+output-format{]} (sha2-512 x output-format (coerce-input-format x)))
+({[}x output-format input-format{]} (-\textgreater{} x
+(alphabase/base-to-byte-array input-format) sha2/sha2-512
+(alphabase/byte-array-to-base (keyword output-format)))))
+
+(defn \^{}:export sha2-512-normalize ``sha2-512 hash of provided string
+after normalizing string.'' ({[}s{]} (sha2-512-normalize s :hex)) ({[}s
+output-format{]} (-\textgreater{} s normalize-string (sha2-512
+output-format :string))))
+
+(defn \^{}:export sha3-256 ({[}x{]} (sha3-256 x :hex)) ({[}x
+output-format{]} (sha3-256 x output-format (coerce-input-format x)))
+({[}x output-format input-format{]} (-\textgreater{} x
+(alphabase/base-to-byte-array input-format) sha3/sha3-256
+(alphabase/byte-array-to-base (keyword output-format)))))
+
+(defn \^{}:export sha3-256-normalize ``sha3-256 hash of provided string
+after normalizing string.'' ({[}s{]} (sha3-256-normalize s :hex)) ({[}s
+output-format{]} (-\textgreater{} s normalize-string (sha3-256
+output-format :string))))
+
+(defn \^{}:export sha3-512 ({[}x{]} (sha3-512 x :hex)) ({[}x
+output-format{]} (sha3-512 x output-format (coerce-input-format x)))
+({[}x output-format input-format{]} (-\textgreater{} x
+(alphabase/base-to-byte-array input-format) sha3/sha3-512
+(alphabase/byte-array-to-base (keyword output-format)))))
+
+(defn \^{}:export sha3-512-normalize ``sha3-512 hash of provided string
+after normalizing string.'' ({[}s{]} (sha3-512-normalize s :hex)) ({[}s
+output-format{]} (-\textgreater{} s normalize-string (sha3-512
+output-format :string))))
+
+(defn \^{}:export ripemd-160 ({[}x{]} (ripemd-160 x :hex)) ({[}x
+output-format{]} (ripemd-160 x output-format (coerce-input-format x)))
+({[}x output-format input-format{]} (-\textgreater{} x
+(alphabase/base-to-byte-array input-format) ripemd/ripemd-160
+(alphabase/byte-array-to-base (keyword output-format)))))
+
+(defn \^{}:export aes-encrypt ({[}x iv key{]} (aes-encrypt x iv key
+:hex)) ({[}x iv key output-format{]} (aes/encrypt x key \{:iv iv
+:output-format output-format\})))
+
+(defn \^{}:export aes-decrypt ({[}x iv key{]} (aes-decrypt x iv key
+:string :hex)) ({[}x iv key output-format{]} (aes-decrypt x iv key
+output-format :hex)) ({[}x iv key output-format input-format{]}
+(aes/decrypt x key \{:iv iv :input-format input-format :output-format
+output-format\})))
+
+(defn \^{}:export generate-key-pair ({[}{]}
+(secp256k1/generate-key-pair)) ({[}private{]}
+(secp256k1/generate-key-pair private)))
+
+(defn \^{}:export pub-key-from-private ``Take a private key as either a
+hex string or BigInteger (clj) bignumber (cljs), returns as a hex
+string.'' {[}private-key{]} (-\textgreater{}
+(secp256k1/public-key-from-private private-key)
+secp256k1/format-key-pair :public))
+
+(defn \^{}:export account-id-from-public {[}public-key{]}
+(secp256k1/get-sin-from-public-key public-key))
+
+(def \^{}:export account-id-from-private (comp account-id-from-public
+pub-key-from-private))
+
+(defn \^{}:export sign-message ``Sign some message with provided private
+key.\n  Message must be a byte-array or string.\n  Private key must be
+hex-encoded or a BigInteger(clj)/bignumber(cljs).'' {[}message
+private-key{]} (secp256k1/sign message private-key))
+
+(defn \^{}:export verify-signature ``Verifies signature of message is
+valid.'' {[}pub-key message signature{]} (secp256k1/verify pub-key
+message signature))
+
+(defn \^{}:export pub-key-from-message ``Returns public key, and
+verifies message is correctly signed. If not correctly signed, throws
+exception.'' {[}message signature{]} (secp256k1/recover-public-key
+message signature))
+
+(defn \^{}:export account-id-from-message ``Given a message and
+signature, returns the corresponding account id only if the signature is
+valid. If invalid, will throw exception.'' {[}message signature{]}
+(-\textgreater{} (pub-key-from-message message signature)
+account-id-from-public))
+
+(defn \^{}:export scrypt-encrypt ``Encrypts a message (string) using a
+salt (bytes). Returns the encrypted message in hex.'' {[}message \&
+args{]} (let {[}byte-msg (string-\textgreater byte-array message){]}
+(-\textgreater{} (apply scrypt/encrypt byte-msg args)
+(alphabase/byte-array-to-base :hex))))
+
+(defn \^{}:export scrypt-check ``Compares a message (string) with
+previously encrypted message (hex).'' {[}message encrypted \& args{]}
+(let {[}byte-msg (string-\textgreater byte-array message) byte-encryped
+(alphabase/base-to-byte-array encrypted :hex){]} (apply scrypt/check
+byte-msg byte-encryped args)))
+
+(defn \^{}:export random-bytes ``Generates n random bytes.'' {[}n{]}
+(scrypt/random-bytes n))
+
+(defn \^{}:export create-jws ``Sign a string with the secp256k1 private
+key.'' {[}s private-key{]} (jws/serialize-jws s private-key))
+
+(defn \^{}:export verify-jws ``Verify the supplied compact JWS. If
+valid, returns the base64 decoded payload and the public key. If
+invalid, returns nil.'' {[}jws{]} (jws/verify jws))
+
+(comment
+
+(def kp (generate-key-pair))
+
+(def private \#?(:cljs (.-private kp) :clj (:private kp))) (def public
+\#?(:cljs (.-public kp) :clj (:public kp)))
+
+(= public (pub-key-from-private private))
+
+(sha2-256 ``hi there'') ;; CLJS + CLJ: ;;
+``9b96a1fe1d548cbbc960cc6a0286668fd74a763667b06366fb2324269fcabaa4''
+
+(sha2-256-normalize (str ``\u0041\u030a'' ``pple'')) (sha2-256-normalize
+(str ``\u00C5'' ``pple'')) ;; CLJS + CLJ ;; For both:
+``58acf888b520fe51ecc0e4e5eef46c3bea3ca7df4c11f6719a1c2471bbe478bf''
+
+(sha2-512 ``hi there'') ;; CLJS + CLJ: ;;
+``db5227a40901a06d455f7666be017c6abbbafdfb3327f4a996d375c3fd020a2bfe464b7cee18caa5d23edf308b76ae623dc8b2b0cec98dc96219ad741b67f5bd''
+
+(sha2-512-normalize (str ``\u00C5'' ``pple'')) (sha2-512-normalize (str
+``\u0041\u030a'' ``pple'')) ;; CLJS + CLJ -\textgreater{} ;; For both:
+``6c406d5e0a5910aeee9adf14425427aa864d55e3dce675eae68d4ad5d6d560199667ac6c8186091f83041f4c8708573881d93ba0e47717bf491a06820a84efef''
+
+(sha3-256 ``hi there'') ;; CLJS + CLJ: ;;
+``f721a1afff8300e03f24a45d337b9a9aa630ca8b7f2b8dca94b44be78e554fa5''
+
+(sha3-256-normalize (str ``\u0041\u030a'' ``pple'')) (sha3-256-normalize
+(str ``\u00C5'' ``pple'')) ;; CLJS + CLJ: ;; For both:
+``56ccd25281a278146afa6770378d0c6949959adb84ad1c688951b7bb4af22401''
+
+(sha3-512 ``hi there'') ;; CLJS + CLJ: ;;
+``4297c279eb3c3ffa693cb856ecdb916a1ad8398cc79b5f7f8420684d77e0a153b96a5e3fe48438bc66f5a56efb25eef5927cb396a4313a38d503d09734154467''
+
+(sha3-512-normalize (str ``\u0041\u030a'' ``pple'')) (sha3-512-normalize
+(str ``\u00C5'' ``pple'')) ;; CLJS + CLJ: ;; For both: ;;
+``085fb750a248ee4206d9255a2082ae5b17b9582f0fd856e75257fec427d329c91ebb67b9c3b49a713aa2a14595bf094f78de2d359b38903bae2388beb49f206d''
+
+(ripemd-160 ``hi there'') ;; CLJS + CLJ: ;;
+6bbf1bb4ef616c675347ca0044f3997fc8ca3921
+
+(aes-encrypt ``hi'' ``there'') ;; CLJ + CLJS ;;
+668cd07d1a17cc7a8a0390cf017ac7ef
+
+(def iv (random-bytes 16)) (aes-encrypt ``hi'' iv ``there'' :none)
+(aes-decrypt (aes-encrypt ``hi'' iv ``there'') iv ``there'')
+(aes-decrypt ``668cd07d1a17cc7a8a0390cf017ac7ef'' ``there'') ;; Working
+in CLJS + CLJ
+
+(aes-encrypt-normalize (str ``\u0041\u030a'' ``pple'') ``there'')
+(aes-encrypt-normalize (str ``\u00C5'' ``pple'') ``there'') (aes-decrypt
+(aes-encrypt-normalize (str ``\u00C5'' ``pple'') ``there'') ``there'')
+;; CLJ + CLJS (aes-encrypt-normalize (str ``\u00C5'' ``pple'')
+``there'') ;; ead3c7632061dd6835477d12ea51f85b
+
+(def account-id (account-id-from-private private)) ;; CLJ + CLJS
+
+(account-id-from-public public) ;; CLJ + CLJS
+
+(def sig (sign-message ``hi'' private))
+
+(verify-signature public ``hi'' sig) ;; CLJ + CLJS
+
+(= public (pub-key-from-message ``hi'' sig)) ;; CLJ + CLJS
+
+(= account-id (account-id-from-message ``hi'' sig)) ;; CLJ + CLJS
+
+(def salt-bytes {[}-84 28 -14 108 -81 -126 -42 6 -7 61 -12 -78 34 8 13
+-78{]}) (def mysalt \#?(:clj (byte-array salt-bytes) :cljs
+(clj-\textgreater js (map \#(if (neg-int? \%) (+ \% 256) \%)
+salt-bytes))))
+
+(def scrypt-hex (scrypt-encrypt ``hi'' mysalt 32768 8 1)) scrypt-hex ;;
+CLJ + CLJS ;;
+``57f93bcf926c31a9e2d2129da84bfca51eb9447dfe1749b62598feacaad657d4''
+
+(scrypt-check ``hi'' scrypt-hex mysalt 32768 8 1)) ;; CLJ + CLJS
+
+\end{document}
