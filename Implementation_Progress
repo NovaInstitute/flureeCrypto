@@ -1,0 +1,18 @@
+FILE                          IMPLEMENTED IN R
+
+aes.cljc                      y
+asn1.cljs                     y
+bn.cljs
+encodings.cljc                y
+hmac.cljc                     y
+jws.cljc
+pkcs7.cljs                    y
+ripemd.cljc                   y
+scrypt.cljc
+secp256k1.cljc
+sha2.cljc                     y
+sha3.cljc                     y
+util.cljc                     y
+crypto.cljc
+crypto_js.cljs
+deps.cljs
