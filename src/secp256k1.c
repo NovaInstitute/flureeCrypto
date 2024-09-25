@@ -1,14 +1,82 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <secp256k1.h>
+#include <secp256k1_ecdh.h>     // For ECDH functionalities
+#include <secp256k1_recovery.h>
 #include<assert.h>
 
 
 // Function prototypes
+SEXP get_curve_order_R();
+SEXP ec_multiply_generator_R(SEXP k);
 SEXP generate_keypair_R();
 SEXP generate_keypair_with_seckey_R();
 SEXP sign_hash_R(SEXP seckey_R, SEXP hash_R);
 SEXP is_valid_private_key_R(SEXP seckey_R);
+
+
+// Function to retrieve the curve order
+SEXP get_curve_order_R() {
+  // Create a context for signing and verifying
+  secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+  
+  // Define the order in bytes as an unsigned char array
+  unsigned char order_bytes[32];
+  
+  // The order of the secp256k1 curve
+  const unsigned char secp256k1_order[32] = {
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE,
+    0xBA, 0xB0, 0xB1, 0x4C, 0x27, 0xB8, 0x19, 0xE3,
+    0xB3, 0x28, 0x3D, 0xD0, 0x74, 0x3A, 0xA6, 0x40,
+    0x41, 0x8B, 0xFA, 0x1D, 0x79, 0x2A, 0x69, 0x69
+  };
+  
+  // Copy the order to the output array
+  memcpy(order_bytes, secp256k1_order, 32);
+  
+  // Create an R raw vector to hold the order bytes
+  SEXP order_vector = PROTECT(allocVector(RAWSXP, 32));
+  memcpy(RAW(order_vector), order_bytes, 32);
+  
+  // Clean up the context to avoid memory leaks
+  secp256k1_context_destroy(ctx);
+  
+  // Unprotect the R object and return it
+  UNPROTECT(1);
+  return order_vector;
+}
+
+// Function to multiply the generator point by a scalar
+SEXP ec_multiply_generator_R(SEXP k) {
+  // Create a context for signing
+  secp256k1_context *ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+  
+  // Convert SEXP to integer
+  int scalar = INTEGER(k)[0];
+  
+  // Prepare an array to hold the resulting coordinates
+  unsigned char result[64];  // 32 bytes for x and 32 bytes for y
+  
+  // Use the recovery function to perform the multiplication
+  int ret = secp256k1_ec_pubkey_serialize(ctx, result, &(size_t){64}, &secp256k1_ge_const_g, SECP256K1_EC_UNCOMPRESSED);
+  
+  if (ret) {
+    // Copy the result into an R raw vector
+    SEXP result_sexp = PROTECT(allocVector(RAWSXP, 64));
+    memcpy(RAW(result_sexp), result, 64);
+    
+    // Cleanup
+    secp256k1_context_destroy(ctx);
+    UNPROTECT(1);
+    return result_sexp;
+  } else {
+    // Handle error
+    secp256k1_context_destroy(ctx);
+    error("Failed to perform elliptic curve multiplication.");
+  }
+  
+  return R_NilValue;  // Fallback return, should not reach here
+}
 
 // keypair generation function
 SEXP generate_keypair_R() {
