@@ -1,4 +1,4 @@
-PROGRESS: 
+2PROGRESS: 
 
 
   Clojure                     R                         TRANSLATED    TESTED
@@ -15,10 +15,10 @@ PROGRESS:
   ":sha3_512"                 "sha3_512"                y             y
   ":sha3_512_normalize"       "sha3_512Normalized"      y             y
   ":ripemd_160"               "ripemd_160"              y             y
-  ":aesEncrypt"               "aesEncrypt"              y
-  ":aesDecrypt"               "aesDecrypt"              y
-  ":generateKeyPair"          "generateKeyPair"
-  ":pubKeyFromPrivate"        "pubKeyFromPriv"          y
+  ":aesEncrypt"               "aesEncrypt"              y             y
+  ":aesDecrypt"               "aesDecrypt"              y             y
+  ":generateKeyPair"          "generateKeyPair"         y             y
+  ":pubKeyFromPrivate"        "pubKeyFromPriv"          y             y
   ":accountIdFromPublic"      "accIdFromPublic"
   ":accountIdFromPrivate"     "accIdFromPriv"
   ":signMessage"              "signMessage"             y
