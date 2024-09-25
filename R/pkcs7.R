@@ -1,34 +1,79 @@
-#' Pad data using PKCS7 padding
+#' Check if a value is a valid byte
 #'
-#' This function adds PKCS7 padding to the input data to make its length a multiple of the block size.
+#' Determines if a given value is a valid byte (an integer between 0 and 255).
 #'
-#' @param data A raw vector containing the data to be padded.
-#' @param block_size An integer specifying the block size in bytes. For AES, this is typically 16.
-#'
-#' @return A raw vector containing the padded data.
-#' @examples
-#' pad_pkcs7(charToRaw("hi"), 16)
-pad_pkcs7 <- function(data, block_size) {
-  pad_length <- block_size - (length(data) %% block_size)
-  padding <- rep(pad_length, pad_length)
-  c(data, padding)
+#' @param b A number to check.
+#' @return TRUE if the value is a valid byte, otherwise FALSE.
+#' @export
+byte_check <- function(b) {
+  is.numeric(b) && b >= 0 && b <= 255 && b == floor(b)
 }
 
-#' Remove PKCS7 padding from data
+#' Check if a vector contains valid bytes
 #'
-#' This function removes PKCS7 padding from the input data. It verifies that the padding is correct.
+#' Determines if all elements in a vector are valid bytes.
 #'
-#' @param data A raw vector containing the padded data.
-#' @param block_size An integer specifying the block size in bytes. For AES, this is typically 16.
-#'
-#' @return A raw vector containing the data with padding removed.
-#' @examples
-#' unpad_pkcs7(pad_pkcs7(charToRaw("hi"), 16), 16)
+#' @param bytes A numeric vector.
+#' @return TRUE if all elements are valid bytes, otherwise FALSE.
 #' @export
-unpad_pkcs7 <- function(data, block_size) {
-  pad_length <- data[length(data)]
-  if (pad_length > block_size || pad_length <= 0) {
-    stop("Invalid PKCS7 padding")
+bytes_check <- function(bytes) {
+  all(sapply(bytes, byte_check))
+}
+
+#' Compare two byte arrays
+#'
+#' Compares two byte arrays for equality. Returns FALSE if they are of different lengths or if either contains invalid bytes.
+#'
+#' @param ba1 A numeric vector (byte array).
+#' @param ba2 A numeric vector (byte array).
+#' @return TRUE if the byte arrays are identical, otherwise FALSE.
+#' @export
+compare_bytes <- function(ba1, ba2) {
+  if (length(ba1) != length(ba2)) {
+    return(FALSE)
   }
-  data[1:(length(data) - pad_length)]
+  if (!bytes_check(ba1) || !bytes_check(ba2)) {
+    return(FALSE)
+  }
+  all(ba1 == ba2)
+}
+
+#' PKCS7 Encode
+#'
+#' Pads a message using PKCS7 padding based on the provided block size.
+#'
+#' @param k An integer representing the block size.
+#' @param m A numeric vector representing the message (byte array) to pad.
+#' @return A numeric vector representing the padded message.
+#' @export
+pkcs7_encode <- function(k, m) {
+  n <- k - (length(m) %% k)
+  c(m, rep(n, n))
+}
+
+#' PKCS7 Decode
+#'
+#' Removes PKCS7 padding from a padded message. Throws an error if the padding is invalid.
+#'
+#' @param k An integer representing the block size.
+#' @param m A numeric vector representing the padded message (byte array).
+#' @return A numeric vector representing the original unpadded message.
+#' @export
+pkcs7_decode <- function(k, m) {
+  len <- length(m)
+  last_byte <- m[len]
+  error <- last_byte > len || last_byte > k || last_byte == 0 || (len %% k != 0)
+  
+  if (error) {
+    stop(paste("Invalid PKCS7 encoding:", paste(m, collapse = " ")))
+  }
+  
+  computed <- rep(last_byte, last_byte)
+  provided <- m[(len - last_byte + 1):len]
+  
+  if (!compare_bytes(computed, provided)) {
+    stop("Padding doesn't match")
+  }
+  
+  m[1:(len - last_byte)]
 }

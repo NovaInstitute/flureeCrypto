@@ -22,22 +22,10 @@ encrypt_aes_cbc <- function(iv, key, data) {
   }
   
   # Pad data with PKCS#7 padding
-  print(class(data))
-  padded_data <- as.raw(pad_pkcs7(data, 16))
-  
-  # Debugging prints
-  print("Key (raw):")
-  print(key)
-  print("IV (raw):")
-  print(iv)
-  print("Padded data (raw):")
-  print(padded_data)
+  padded_data <- as.raw(pkcs7_encode(16, data))
   
   # Perform AES encryption in CBC mode
   encrypted_data <- aes_cbc_encrypt(padded_data, key, iv)
-  
-  print("Encrypted data (raw):")
-  print(encrypted_data)
   
   return(encrypted_data)
 }
@@ -54,9 +42,6 @@ encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46
   # If key is a string, hash it into a 256-bit key (32 bytes)
   if (is.character(key)) {
     key <- hash_string_key(key)
-    key <- charToRaw(key)
-    print(class(key))
-    print(key)
   }
   
   # Convert iv to raw vector if not already raw
@@ -71,21 +56,14 @@ encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46
   
   # Perform AES encryption
   encrypted <- encrypt_aes_cbc(iv, key, x)
-  
-  # Debugging prints
-  print("Encrypted data (before formatting):")
-  print(encrypted)
+  encrypted <- encrypted[1:16]
   
   # Convert encrypted output to desired format
   if (output_format == "hex") {
-    hex_output <- paste(toupper(as.character(encrypted)), collapse = "")
-    print("Encrypted data (hex):")
-    print(hex_output)
+    hex_output <- bin2hex(encrypted)
     return(hex_output)
   } else if (output_format == "base64") {
-    base64_output <- base64_encode(encrypted)
-    print("Encrypted data (base64):")
-    print(base64_output)
+    base64_output <- base64enc::base64encode(encrypted)
     return(base64_output)
   } else {
     return(encrypted)  # Return raw bytes by default
@@ -111,7 +89,9 @@ decrypt_aes_cbc <- function(iv, key, encrypted_data) {
   }
 
   # Perform AES decryption in CBC mode with PKCS7 padding
-  decrypted_data <- openssl::aes_cbc_decrypt(encrypted_data, key = key, iv = iv)
+  decrypted_data <- aes_cbc_decrypt(encrypted_data, key, iv)
+  
+  #unpadded_decrypted <- pkcs7_decode(16, decrypted_data)
 
   return(decrypted_data)
 }
@@ -132,22 +112,12 @@ decrypt_aes_cbc <- function(iv, key, encrypted_data) {
 #' @import openssl
 #' @import sodium
 #' @export
-#' @examples
-#' encrypted_hex <- encrypt_aes("Encrypt this message!", "mysecretpassword")
-#' decrypted_text <- decrypt_aes(encrypted_hex, "mysecretpassword")
-#' print(decrypted_text)  # Outputs: "Encrypt this message!"
-#' encrypted_base64 <- encrypt_aes("Encrypt this message!", "mysecretpassword", output_format = "base64")
-#' decrypted_text <- decrypt_aes(encrypted_base64, "mysecretpassword", input_format = "base64")
-#' print(decrypted_text)  # Outputs: "Encrypt this message!"
-
-decrypt_aes <- function(x, key, iv = as.raw(c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42)),
+decrypt <- function(x, key, iv = as.raw(c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42)),
                         input_format = "hex", output_format = "string") {
 
   # Convert the key to a 256-bit hash if it's a character string
   if (is.character(key)) {
-    key <- sha256(charToRaw(key))
-  } else if (!is.raw(key)) {
-    stop("Key must be a character string or a raw vector.")
+    key <- hash_string_key(key)
   }
 
   # Convert the input to a raw vector if it's a character string in hex or base64 format
@@ -164,13 +134,13 @@ decrypt_aes <- function(x, key, iv = as.raw(c(6, 224, 71, 170, 241, 204, 115, 21
   }
 
   # Perform AES decryption using the decrypt_aes_cbc function
-  decrypted_data <- decrypt_aes_cbc(iv, key, x)
+  decrypted <- decrypt_aes_cbc(iv, key, x)
 
   # Return the decrypted data in the specified output format
   if (output_format == "string") {
-    return(rawToChar(decrypted_data))
+    return(rawToChar(decrypted))
   } else if (output_format == "hex") {
-    return(bin2hex(decrypted_data))
+    return(bin2hex(decrypted))
   } else if (output_format == "none") {
     return(decrypted_data)
   } else {
