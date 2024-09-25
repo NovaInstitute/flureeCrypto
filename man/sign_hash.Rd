@@ -4,7 +4,7 @@
 \alias{sign_hash}
 \title{Sign a message hash}
 \usage{
-sign_hash(seckey, hash)
+sign_hash(message, seckey)
 }
 \arguments{
 \item{seckey}{Private key (32 bytes)}

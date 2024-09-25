@@ -2,13 +2,34 @@
 % Please edit documentation in R/secp256k1_wrapper.R
 \name{generate_keypair}
 \alias{generate_keypair}
-\title{Generate a keypair}
+\title{Generate a secp256k1 Keypair}
 \usage{
-generate_keypair()
+generate_keypair(seckey = NULL)
+}
+\arguments{
+\item{seckey}{Optional 32-byte raw vector representing a private key. If \code{NULL}, a random
+private key will be generated.}
 }
 \value{
-A list with 'seckey' and 'pubkey' raw vectors
+A list with two elements:
+\describe{
+\item{private}{A hexadecimal string representing the private key.}
+\item{public}{A hexadecimal string representing the public key.}
+}
 }
 \description{
-Generate a keypair
+This function generates a secp256k1 keypair. If a private key (\code{seckey}) is provided,
+the public key is generated from the private key. If no \code{seckey} is provided, a random
+private key is generated.
+}
+\examples{
+# Generate a random keypair
+keypair <- generate_keypair_wrapper()
+print(keypair)
+
+# Generate a keypair from a provided private key
+seckey <- as.raw(sample(0:255, 32, replace = TRUE))
+keypair <- generate_keypair_wrapper(seckey)
+print(keypair)
+
 }
