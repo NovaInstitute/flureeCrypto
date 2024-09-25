@@ -1,4 +1,4 @@
-PROGRESS: 
+2PROGRESS: 
 
 
   Clojure                     R                         TRANSLATED    TESTED
@@ -14,11 +14,11 @@ PROGRESS:
   ":sha3_256_normalize"       "sha3_256Normalized"      y             y
   ":sha3_512"                 "sha3_512"                y             y
   ":sha3_512_normalize"       "sha3_512Normalized"      y             y
-  ":ripemd_160"               "ripemd_160"              y
-  ":aesEncrypt"               "aesEncrypt"              y
-  ":aesDecrypt"               "aesDecrypt"              y
-  ":generateKeyPair"          "generateKeyPair"
-  ":pubKeyFromPrivate"        "pubKeyFromPriv"          y
+  ":ripemd_160"               "ripemd_160"              y             y
+  ":aesEncrypt"               "aesEncrypt"              y             y
+  ":aesDecrypt"               "aesDecrypt"              y             y
+  ":generateKeyPair"          "generateKeyPair"         y             y
+  ":pubKeyFromPrivate"        "pubKeyFromPriv"          y             y
   ":accountIdFromPublic"      "accIdFromPublic"
   ":accountIdFromPrivate"     "accIdFromPriv"
   ":signMessage"              "signMessage"             y
@@ -30,3 +30,82 @@ PROGRESS:
   ":randomBytes"              "randBytes"
   ":createJWS"                "createJWS"
   ":verifyJWS"                "verifyJWS"
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Load necessary libraries
+library(openssl) # For AES encryption (R equivalent of Java's Cipher)
+library(digest)  # For key hashing (R equivalent of util/hash-string-key)
+
+encrypt_aes_cbc <- function(iv, key_bytes, data_bytes) {
+  iv_bytes <- as.raw(iv)
+  
+  # Prepare the AES cipher with the provided key and IV
+  aes_cipher <- AES(key = key_bytes, iv = iv_bytes, mode = "cbc", padding = "pkcs")
+  
+  # Encrypt the data
+  encrypted_data <- aes_cipher$encrypt(data_bytes)
+  
+  return(encrypted_data)
+}
+
+#' Encrypts with AES/CBC/PKCS{5/7}Padding
+#'
+#' @param x The data to encrypt (as a string or byte vector)
+#' @param key The encryption key (as a string or byte vector)
+#' @param iv Optional: The initialization vector as an integer vector of size 16 (default is pre-set)
+#' @param output_format Optional: Format of the output - either "hex", "base64", or "none"
+#'
+#' @return Encrypted data in the specified output format
+encrypt_aes <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42), output_format = "hex") {
+  
+  # Convert key to byte array if it's a string
+  key_bytes <- if (is.character(key)) {
+    sha256(key)
+  } else {
+    as.raw(key)
+  }
+  
+  # Convert input data to byte array if it's a string
+  data_bytes <- if (is.character(x)) {
+    charToRaw(x)
+  } else {
+    as.raw(x)
+  }
+  
+  # Perform encryption
+  encrypted_data <- encrypt_aes_cbc(iv, key_bytes, data_bytes)
+  
+  # Return encrypted data in the specified format
+  if (output_format == "none") {
+    return(encrypted_data)
+  } else if (output_format == "hex") {
+    return(paste(as.hexmode(encrypted_data), collapse = ""))
+  } else if (output_format == "base64") {
+    return(base64enc::base64encode(encrypted_data))
+  } else {
+    stop("Invalid output format specified.")
+  }
+}

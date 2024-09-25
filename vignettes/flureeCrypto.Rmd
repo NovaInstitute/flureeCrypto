@@ -1,0 +1,130 @@
+---
+title: "flureeCrypto"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{flureeCrypto}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette introduces you to working with and on the flureeCrypto package.
+It serves as a one-stop guide starting off with basics on working with R 
+packages, linking the libsecp256k1 C package to flureeCrypto and then finally an 
+outline of the functions contained within the package and their use cases  will 
+be given.
+
+```{r setup}
+library(flureeCrypto)
+```
+
+-------------------------------------------------------------------------------
+
+## R packages basics
+
+#### Create a local R project for the package
+
+1.	Make sure R and RStudio are both installed to your computer.
+2.	Open RStudio and create a new Project (“File” -> “New Project” -> 
+“Version Control” -> “Git”   and paste the URL of the repository to be cloned)
+
+#### Build the package locally 
+
+1. In the Build pane click on “Install” -> “Clean and Install” in RStudio.
+2. Alternatively run the following commands in the console:  devtools::install()
+
+Now that a local copy of the package exists and is linked to git any updates 
+made to the package can be committed and pushed to git from RStudio.  Remember 
+that when changes are made to the functions in the package the package needs to 
+be built and installed again for these changes to reflect.
+
+-------------------------------------------------------------------------------
+
+## Using libsecp256k1 in R
+
+
+**STEP 1:  INSTALL THE C LIBRARY**
+
+*ON MACOS*
+
+1. Install the package using Homebrew: 
+```
+brew install secp256k1
+```
+2. Make sure the directory to the header file "secp256k1" is known. This file 
+should be visible under /opt/homebrew/include.
+
+*ON WINDOWS*
+
+
+**STEP 2:  UPDATE DIRECTORY STRUCTURE**
+
+Within our R package we make a new /src directory.  Within this directory we 
+will keep all the C files.  In particular we require 3 files:
+1. "secp256k1.c" which contains all the cryptography functions we want to use 
+written in such a format that it returns R's internal datatype (SEXP).
+2. "Makevars" which includes 2 tags - one pointing to where the secp256k1 
+library can be found and the other where the "secp256k1.h" header file can be 
+found.
+3. "init.c" which basically serves as a registration mechanism for all the 
+C functions in "secp256k1.c" when the package is built. 
+
+**STEP 3:  WRITE R WRAPPER FUNCTIONS**
+
+Now that the necessary files have been created within the /src directory we 
+require a wrapper function for each function defined in "secp256k1.c".  These 
+wrapper functions can be written anywhere within our /R directory and can call
+the corresponding C function using `.Call()`.
+
+**STEP 4:  KEEP NAMESPACE UP TO DATE**
+
+It is important to note that while the NAMESPACE file of our package can be 
+updtated automatically using `devtools::document()` this will not include 
+our C functions.  
+These have to be added manually.  Consider the following as an example:
+```
+useDynLib(flureeCrypto, .registration = TRUE)
+export(generate_keypair_R)
+export(generate_keypair_with_seckey_R)
+export(sign_hash_R)
+export(is_valid_private_key_R)
+```
+-------------------------------------------------------------------------------
+
+### Testing the package functions
+
+In order to test that the functions work as expected we make use of the 
+`testthat()` library.
+
+**STEP 1:  CREATE A DIRECTORY FOR TESTING**
+
+Create a /tests directory within the package. Within this new directory create 
+another directory /testthat.  Now within this directory 
+(i.e. within /flureeCrypto/tests/testthat) create a new R script.
+
+**STEP 2:  FORMULATE THE TESTS**
+
+Within the script created in step 1 we define all our tests.  Use 
+`context()` to give context before each test is performed and then use the 
+`testthat()` function to actually perform the test.  The result of 
+`expect_equal()` will determine whether the test is passed or failed.  See the 
+testUtilities.R file for some example tests.
+
+**STEP 3:  RUN TESTS**
+
+Once all the tests have been written within the .R file they can be run using 
+the `devtools::test()` command in the console. This will output the pass/fail 
+status of each test. 
+
+-------------------------------------------------------------------------------
+# The **flureeCrypto** package
+
+In the following section more detail will be given on the functions contained 
+within the package and the functionality thereof. 
+
