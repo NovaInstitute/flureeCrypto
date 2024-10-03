@@ -63,17 +63,17 @@ pkcs7_decode <- function(k, m) {
   len <- length(m)
   last_byte <- m[len]
   error <- last_byte > len || last_byte > k || last_byte == 0 || (len %% k != 0)
-  
+
   if (error) {
     stop(paste("Invalid PKCS7 encoding:", paste(m, collapse = " ")))
   }
-  
+
   computed <- rep(last_byte, last_byte)
   provided <- m[(len - last_byte + 1):len]
-  
+
   if (!compare_bytes(computed, provided)) {
     stop("Padding doesn't match")
   }
-  
+
   m[1:(len - last_byte)]
 }
