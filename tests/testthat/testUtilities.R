@@ -493,9 +493,17 @@ result
 
 # scrypt encrypt
 
-message <- charToRaw("hello")
-salt_bytes <- as.raw(c(-84, 28, -14, 108, -81, -126, -42, 6, -7, 61, -12, -78, 34, 8, 13, -78))
-result <- encrypt(message, salt = salt_bytes)
+message <- charToRaw("hi")
+result <- encrypt(message, salt)
 bin2hex(result)
 
-check(message, result, salt_bytes)
+salt = c(172, 28, 242, 108, 175, 130, 214, 6, 249, 61, 244, 178, 34, 8, 13, 178);
+
+
+check(message, result, salt)
+
+
+# curve modulus
+n <- get_modulus()
+class(n)
+n

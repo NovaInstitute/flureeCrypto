@@ -10,8 +10,8 @@ test_that("encrypt", {
   message <- "hi"
   key <- "there"
   
-  result <- encrypt(x, key, iv)
-  
+  result <- aes_encrypt(message, key, iv)
+  print(result)
   expect_equal(result, "668cd07d1a17cc7a8a0390cf017ac7ef")
 })
 

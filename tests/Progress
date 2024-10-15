@@ -43,20 +43,21 @@ still need to be integerated with the R package.
 
         scrypt.cljc
 "random-bytes"                    "random_bytes"            y               y
-"encrypt"                         "encrypt"                 y               output mismatch
-"check"                           "check"                   y               output mismatch
+"encrypt"                         "encrypt"                 y               y
+"check"                           "check"                   y               y
 
+
+The following functions work in C.  They still need to be integrated to R with corresponding wrapper functions
         secp256k1.cljc
-"secp256k1"
-"valid-private"
-"format-public-key"
-"format-key-pair"
-"public-key-from-private"
+"valid-private"                                             y               y
+"format-public-key"                                         y               y
+"format-key-pair"                                           y               y
+"public-key-from-private"                                   y               y  
 "pub-key->bytes"
 "->byte-array"
 "get-sin-from-public-key"
-"new-private-key"
-"generate-key-pair"
+"new-private-key"                                           y               y
+"generate-key-pair"                                         y               y
 "deterministic-generate-k"
 "compute-recovery-byte"
 "sign-hash"
