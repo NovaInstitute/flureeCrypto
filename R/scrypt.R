@@ -1,9 +1,3 @@
-
-#if (!require("devtools"))
-#  install.packages("devtools")
-#devtools::install_github("rstudio/rscrypt")
-
-
 #' Generate Random Bytes
 #'
 #' Generates a random byte array of the specified size.
@@ -31,6 +25,7 @@ random_bytes <- function(size) {
 #' @return A raw vector containing the encrypted message.
 #' @export
 encrypt <- function(raw, salt = random_bytes(16), n = 32768, r = 8, p = 1, dk_len = 32) {
+  salt <- map_signed_to_unsigned(salt)
   scrypt::scrypt(raw, salt, n, r, p, length = dk_len)
 }
 
@@ -49,6 +44,7 @@ encrypt <- function(raw, salt = random_bytes(16), n = 32768, r = 8, p = 1, dk_le
 #' @export
 check <- function(raw, encrypted, salt, n = 32768, r = 8, p = 1) {
   dk_len <- length(encrypted)
+  salt <- map_signed_to_unsigned(salt)
   test_encrypted <- encrypt(raw, salt, n, r, p, dk_len)
   identical(encrypted, test_encrypted)
 }

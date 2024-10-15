@@ -87,3 +87,39 @@ byte_array_to_string <- function(s) {
     stop("Unsupported input type. Expected a raw vector or numeric vector.")
   }
 }
+
+#' Map Excess-127 Function
+#'
+#' This function takes a vector of integers and transforms each element:
+#' If an element is greater than 127, it subtracts 256 from that element;
+#' otherwise, it leaves the element unchanged. This represents an Excess-127 format.
+#'
+#' @param iv A numeric vector containing integer values.
+#' @return A numeric vector with transformed values.
+#' @examples
+#' # Example usage
+#' iv <- c(130, 120, 127, 255)
+#' result <- map_excess_127(iv)
+#' print(result)  # Output: [1] -126 120 127 -1
+map_excess_127 <- function(ba) {
+  result <- ifelse(ba > 127, ba - 256, ba)
+  return(result)
+}
+
+#' Map Signed to Unsigned Function
+#'
+#' This function takes a vector of integers and replaces negative integers
+#' with their positive counterparts (by adding 256) while leaving other 
+#' integers unchanged.
+#'
+#' @param salt_bytes A numeric vector containing integer values.
+#' @return A numeric vector with negative integers replaced.
+#' @examples
+#' # Example usage
+#' salt_bytes <- c(-5, 0, 10, -128, 255)
+#' result <- map_signed_to_unsigned(salt_bytes)
+#' print(result)  # Output: [1] 251 0 10 128 255
+map_signed_to_unsigned <- function(ba) {
+  result <- ifelse(ba < 0, ba + 256, ba)
+  return(result)
+}
