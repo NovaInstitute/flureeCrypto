@@ -36,7 +36,7 @@ encrypt_aes_cbc <- function(iv, key, data) {
 #' @return The encrypted data in the specified output format.
 #' 
 #' @export
-encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42), output_format = "hex") {
+aes_encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42), output_format = "hex") {
   # If the provided key is a string, hash it into a 256-bit key (32 raw bytes).
   if (is.character(key)) {
     key_ba <- as.raw(hash_string_key(key))
@@ -45,6 +45,10 @@ encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46
   } else {
     stop("Encryption key should be a character string or raw byte array.")
   }
+  
+  print(iv)
+  iv <- map_excess_127(iv)
+  print(iv)
   
   # Convert the initialisation vector to a raw vector if it is not already.
   if (!is.raw(iv)) {
@@ -115,7 +119,7 @@ decrypt_aes_cbc <- function(iv, key, encrypted_data) {
 #' @return The decrypted data in the specified format.
 #' 
 #' @export
-decrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42),
+aes_decrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42),
                         input_format = "hex", output_format = "string") {
 
   # Convert the key to a 256-bit hash if it's a character string
