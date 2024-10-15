@@ -85,15 +85,11 @@ the corresponding C function using `.Call()`.
 **STEP 4:  KEEP NAMESPACE UP TO DATE**
 
 It is important to note that while the NAMESPACE file of our package can be 
-updtated automatically using `devtools::document()` this will not include 
-our C functions.  
-These have to be added manually.  Consider the following as an example:
+updated automatically using `devtools::document()` this will not yet allow
+full functionality of the C functions. 
+The following line has to be added manually to "NAMESPACE".
 ```
 useDynLib(flureeCrypto, .registration = TRUE)
-export(generate_keypair_R)
-export(generate_keypair_with_seckey_R)
-export(sign_hash_R)
-export(is_valid_private_key_R)
 ```
 -------------------------------------------------------------------------------
 
