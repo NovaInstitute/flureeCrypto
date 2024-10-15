@@ -2,18 +2,16 @@
 % Please edit documentation in R/encodings.R
 \name{biginteger_to_bytes}
 \alias{biginteger_to_bytes}
-\title{Converts a big integer to bytes}
+\title{Convert BigInteger to Byte Array}
 \usage{
-biginteger_to_bytes(bn, len = NULL)
+biginteger_to_bytes(bn)
 }
 \arguments{
-\item{bn}{A big integer value (can be numeric or character)}
-
-\item{len}{Optional length of byte array (if not provided, the minimum length is used)}
+\item{bn}{A GMP big integer (from the \code{gmp} library in R).}
 }
 \value{
-A raw byte vector representing the big integer
+A raw byte array representing the big integer.
 }
 \description{
-Converts a big integer to bytes
+This function converts a GMP big integer to a raw byte array.
 }

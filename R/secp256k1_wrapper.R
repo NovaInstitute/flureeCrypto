@@ -101,9 +101,12 @@ rawToBigInteger <- function(raw_data) {
 #' 
 #' @return A raw vector representing the curve order.
 #' @export
-get_curve_order <- function() {
-  .Call("get_curve_order_R")
+get_modulus <- function() {
+  N <- .Call("get_modulus_R")
+  return(N)
 }
+# this function works... implement hex->biginteger for conversion
+
 
 #' Compute Recovery Byte
 #'

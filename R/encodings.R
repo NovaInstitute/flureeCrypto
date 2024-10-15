@@ -14,22 +14,25 @@ pad_hex <- function(hex) {
   }
 }
 
-#' Convert a big integer to raw bytes
+library(gmp)
+#' Convert BigInteger to Byte Array
 #'
-#' @param bn A big integer value (as an R numeric or character)
-#' @return A raw byte vector representing the big integer
+#' This function converts a GMP big integer to a raw byte array.
+#'
+#' @param bn A GMP big integer (from the `gmp` library in R).
+#' @return A raw byte array representing the big integer.
 #' @export
 biginteger_to_bytes <- function(bn) {
-  # Ensure bn is of type biginteger
+  # Ensure it's a gmp bigz object
   if (!inherits(bn, "bigz")) {
-    stop("Input must be a big integer.")
+    stop("bn must be a gmp::bigz object")
   }
   
-  # Call the C function
-  len <- as.integer(0)  # Initialize length variable
-  bytes_ptr <- .Call("biginteger_to_bytes_R", bn, len)  # Call to C function
-  raw_bytes <- raw(bytes_ptr)  # Convert to raw type
-  return(raw_bytes)
+  # Convert bigz to a string (base 16/hexadecimal)
+  bn_hex <- as.character(bn, base = 16)
+  
+  # Pass the string to C
+  .Call("biginteger_to_bytes", bn_hex)
 }
 
 #' Convert a big integer to a hexadecimal string
@@ -46,40 +49,6 @@ biginteger_to_hex <- function(bn) {
   # Call the C function
   hex_string <- .Call("biginteger_to_hex_R", bn)  # Call to C function
   return(hex_string)
-}
-
-#' Converts a big integer to bytes
-#'
-#' @param bn A big integer value (can be numeric or character)
-#' @param len Optional length of byte array (if not provided, the minimum length is used)
-#' @return A raw byte vector representing the big integer
-#' @export
-biginteger_to_bytes <- function(bn, len = NULL) {
-  # Convert big integer to hexadecimal representation
-  bn_hex <- sprintf("%x", bn)
-  
-  # Add leading zero if the hex string has odd length (to ensure complete bytes)
-  if (nchar(bn_hex) %% 2 != 0) {
-    bn_hex <- paste0("0", bn_hex)
-  }
-  
-  # Convert hex string to raw bytes
-  raw_bytes <- as.raw(as.integer(sapply(seq(1, nchar(bn_hex), by = 2), function(i) {
-    substr(bn_hex, i, i+1)
-  }), 16))
-  
-  # If a specific length is provided, pad or trim the raw bytes
-  if (!is.null(len)) {
-    if (length(raw_bytes) < len) {
-      # Pad with leading zeros
-      raw_bytes <- c(rep(as.raw(0), len - length(raw_bytes)), raw_bytes)
-    } else {
-      # Trim the raw bytes to the specified length
-      raw_bytes <- raw_bytes[(length(raw_bytes) - len + 1):length(raw_bytes)]
-    }
-  }
-  
-  return(raw_bytes)
 }
 
 #' Convert the first byte of a raw byte vector to an integer
