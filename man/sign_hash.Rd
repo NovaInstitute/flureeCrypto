@@ -2,18 +2,21 @@
 % Please edit documentation in R/secp256k1_wrapper.R
 \name{sign_hash}
 \alias{sign_hash}
-\title{Sign a message hash}
+\title{Sign a Hash}
 \usage{
-sign_hash(message, seckey)
+sign_hash(hash_ba, private_bn, recovery_byte = TRUE)
 }
 \arguments{
-\item{seckey}{Private key (32 bytes)}
+\item{hash_ba}{A raw vector representing the hash to be signed.}
 
-\item{hash}{Message hash (32 bytes)}
+\item{private_bn}{A numeric representing the private key.}
+
+\item{recovery_byte}{Logical indicating whether to compute the recovery byte.}
 }
 \value{
-A raw vector of the signature (64 bytes)
+A character string representing the hexadecimal encoded DER signature.
 }
 \description{
-Sign a message hash
+Returns a signature for the given hash using the provided private key.
+Utilizes deterministic generation of k according to RFC 6979.
 }

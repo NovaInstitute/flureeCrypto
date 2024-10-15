@@ -2,12 +2,12 @@
 % Please edit documentation in R/aes.R
 \name{decrypt}
 \alias{decrypt}
-\title{Decrypt with AES/CBC/PKCS7Padding}
+\title{Data conversion before and after AES decryption}
 \usage{
 decrypt(
   x,
   key,
-  iv = as.raw(c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42)),
+  iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42),
   input_format = "hex",
   output_format = "string"
 )
@@ -27,14 +27,8 @@ decrypt(
 The decrypted data in the specified format.
 }
 \description{
-Decrypts the input using AES decryption in CBC mode with PKCS7 padding. The key is hashed to 256 bits.
-You can provide an alternate initialization vector (IV) of unsigned bytes of size 16 for CBC.
-}
-\examples{
-encrypted_hex <- encrypt_aes("Encrypt this message!", "mysecretpassword")
-decrypted_text <- decrypt_aes(encrypted_hex, "mysecretpassword")
-print(decrypted_text)  # Outputs: "Encrypt this message!"
-encrypted_base64 <- encrypt_aes("Encrypt this message!", "mysecretpassword", output_format = "base64")
-decrypted_text <- decrypt_aes(encrypted_base64, "mysecretpassword", input_format = "base64")
-print(decrypted_text)  # Outputs: "Encrypt this message!"
+Decrypts the input using AES decryption in CBC mode with PKCS7 padding.
+The key is hashed to 256 bits.
+An alternate initialization vector (IV) of unsigned bytes of size 16 my be
+provided.
 }

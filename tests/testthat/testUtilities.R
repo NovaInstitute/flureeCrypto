@@ -3,7 +3,21 @@ library(flureeCrypto)
 # -----------------------------------------------------------------------------
 
 
+# -----------------------------------------------------------------------------
+#     HASH STRING KEY
+context("hash-string-key")
+# -----------------------------------------------------------------------------
+test_that("Hash-string-key test", {
+  actual_output <- hash_string_key("hello", 32)
+  expected_output <- c(117, -43, 39, -61, 104, -14, -17, -24, 72, -20, -10, -80, 115, -93, 103, 103, -128, 8, 5, -23, -18, -14, -79, -123, 125, 95, -104, 79, 3, 110, -74, -33)
+  
+  expect_equal(actual_output, expected_output)
+  
+})
 
+result <- hash_string_key("there")
+result
+class(result)
 
 
 # -----------------------------------------------------------------------------
@@ -447,4 +461,41 @@ context("generate keypair")
 #str_length(signature)
 #str_length("1b3046022100cbd32e463567fefc2f120425b0224d9d263008911653f50e83953f47cfbef3bc022100fcf81206277aa1b86d2667b4003f44643759b8f4684097efd92d56129cd89ea8")
 
+# biginteger
+b <- as.bigz(12345678)
+result <- biginteger_to_hex_R(b)
+result
 
+# modular square_root
+n <- as.bigz(9)
+modulus <- as.bigz(11)
+result <- modular_square_root(n, modulus)
+
+# Display the result
+result
+
+ba <- charToRaw("hello")
+ba
+
+byte_to_int(ba)
+
+# compute a point
+x <- as.bigz("1234567890123456789012345678901234567890")
+curve <- list(n = as.bigz("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16))  # Example curve
+result <- compute_point(TRUE, x, curve)
+print(result)
+
+# hmac 
+message <- charToRaw("hello")
+k <- charToRaw("secret")
+result <- hmac_sha256(message, k)
+result
+
+# scrypt encrypt
+
+message <- charToRaw("hello")
+salt_bytes <- as.raw(c(-84, 28, -14, 108, -81, -126, -42, 6, -7, 61, -12, -78, 34, 8, 13, -78))
+result <- encrypt(message, salt = salt_bytes)
+bin2hex(result)
+
+check(message, result, salt_bytes)

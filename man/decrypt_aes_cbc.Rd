@@ -2,20 +2,22 @@
 % Please edit documentation in R/aes.R
 \name{decrypt_aes_cbc}
 \alias{decrypt_aes_cbc}
-\title{AES Decryption with CBC Mode}
+\title{Decrypt data using AES}
 \usage{
 decrypt_aes_cbc(iv, key, encrypted_data)
 }
 \arguments{
-\item{iv}{A raw vector representing the initialization vector (IV).}
+\item{iv}{A raw vector representing the initialization vector.}
 
 \item{key}{A raw vector representing the key for AES decryption. It should be exactly 16, 24, or 32 bytes.}
 
 \item{encrypted_data}{A raw vector representing the data to be decrypted.}
 }
 \value{
-A raw vector representing the decrypted data.
+The character string representation of the decrypted data.
 }
 \description{
-This function decrypts data using AES decryption in CBC mode with PKCS7 padding (compatible with PKCS5).
+This function decrypts a message using AES decryption in CBC mode with PKCS7 padding.
+It receives the necessary input from the "decrypt" function after all the
+necessary type-checking and conversions have been done.
 }

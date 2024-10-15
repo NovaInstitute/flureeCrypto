@@ -18,7 +18,11 @@ A raw vector containing the first \code{n} bytes of the SHA3-512 hash.
 This function takes a string key, hashes it using the SHA3-512 algorithm, and returns the first \code{n} bytes of the hash.
 }
 \examples{
-hash_string_key("example-key", 32)
+hash_string_key("hello", 32)
 hash_string_key(charToRaw("example-key"), 16)
-
+# fluree.crypto.util=> (hash-string-key "hello" 32)
+# (117 -43 39 -61 104 -14 -17 -24 72 -20 -10 -80 115 -93 103 103 -128 8 5 
+-23 -18 -14 -79 -123 125 95 -104 79 3 110 -74 -33)
+# fluree.crypto.util=> (hash-string-key "example-key" 16)
+# (-1 115 100 -51 32 13 -97 54 15 -13 -70 41 -90 -10 93 4)
 }

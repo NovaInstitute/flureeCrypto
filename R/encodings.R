@@ -1,7 +1,11 @@
+library(gmp)
 #' Pads a hexadecimal string with a leading zero if the length is odd
 #'
 #' @param hex A hexadecimal string
+#' 
 #' @return A padded hexadecimal string with a leading zero if necessary
+#' 
+#' @export
 pad_hex <- function(hex) {
   if (nchar(hex) %% 2 == 1) {
     paste0("0", hex)
@@ -10,47 +14,95 @@ pad_hex <- function(hex) {
   }
 }
 
-#' Converts a big integer to a hexadecimal string
+#' Convert a big integer to raw bytes
 #'
-#' @param bn A big integer value (secp256k1 bigint)
-#' @return A hexadecimal string representing the big integer
-biginteger_to_hex <- function(bn) {
-  as.character(bn, base = 16)
+#' @param bn A big integer value (as an R numeric or character)
+#' @return A raw byte vector representing the big integer
+#' @export
+biginteger_to_bytes <- function(bn) {
+  # Ensure bn is of type biginteger
+  if (!inherits(bn, "bigz")) {
+    stop("Input must be a big integer.")
+  }
+  
+  # Call the C function
+  len <- as.integer(0)  # Initialize length variable
+  bytes_ptr <- .Call("biginteger_to_bytes_R", bn, len)  # Call to C function
+  raw_bytes <- raw(bytes_ptr)  # Convert to raw type
+  return(raw_bytes)
 }
 
-#' Converts a hexadecimal string to a big integer
+#' Convert a big integer to a hexadecimal string
 #'
-#' @param hex A hexadecimal string
-#' @return A big integer converted from the hexadecimal string
-hex_to_biginteger <- function(hex) {
-  as.bigz(hex, base = 16)
+#' @param bn A big integer value (as an R numeric or character)
+#' @return A string representing the hexadecimal value of the big integer
+#' @export
+biginteger_to_hex <- function(bn) {
+  # Ensure bn is of type biginteger
+  if (!inherits(bn, "bigz")) {
+    stop("Input must be a big integer.")
+  }
+  
+  # Call the C function
+  hex_string <- .Call("biginteger_to_hex_R", bn)  # Call to C function
+  return(hex_string)
 }
 
 #' Converts a big integer to bytes
 #'
-#' @param bn A big integer value
-#' @param len Optional length of byte array
-#' @return A raw byte vector of the big integer
+#' @param bn A big integer value (can be numeric or character)
+#' @param len Optional length of byte array (if not provided, the minimum length is used)
+#' @return A raw byte vector representing the big integer
+#' @export
 biginteger_to_bytes <- function(bn, len = NULL) {
-  raw_bn <- as.raw(as.bigz(bn))
-  if (!is.null(len) && length(raw_bn) < len) {
-    raw_bn <- c(rep(as.raw(0), len - length(raw_bn)), raw_bn)
+  # Convert big integer to hexadecimal representation
+  bn_hex <- sprintf("%x", bn)
+  
+  # Add leading zero if the hex string has odd length (to ensure complete bytes)
+  if (nchar(bn_hex) %% 2 != 0) {
+    bn_hex <- paste0("0", bn_hex)
   }
-  raw_bn
+  
+  # Convert hex string to raw bytes
+  raw_bytes <- as.raw(as.integer(sapply(seq(1, nchar(bn_hex), by = 2), function(i) {
+    substr(bn_hex, i, i+1)
+  }), 16))
+  
+  # If a specific length is provided, pad or trim the raw bytes
+  if (!is.null(len)) {
+    if (length(raw_bytes) < len) {
+      # Pad with leading zeros
+      raw_bytes <- c(rep(as.raw(0), len - length(raw_bytes)), raw_bytes)
+    } else {
+      # Trim the raw bytes to the specified length
+      raw_bytes <- raw_bytes[(length(raw_bytes) - len + 1):length(raw_bytes)]
+    }
+  }
+  
+  return(raw_bytes)
 }
 
-#' Converts bytes to a big integer
+#' Convert the first byte of a raw byte vector to an integer
 #'
-#' @param bytes A raw byte vector
-#' @return A big integer value
-bytes_to_biginteger <- function(bytes) {
-  as.bigz(bytes, base = 256)
+#' @param the_bytes A raw byte vector
+#' @return An integer representation of the first byte
+byte_to_int <- function(the_bytes) {
+  # Ensure the input is a raw byte vector
+  if (!is.raw(the_bytes)) {
+    stop("Input must be a raw byte vector.")
+  }
+  
+  # Convert the first byte to an integer
+  int_value <- as.integer(the_bytes[1])
+  
+  return(int_value)
 }
 
 #' Pads a string to a specified length with leading zeroes
 #'
 #' @param s A string
 #' @param len The desired length of the string
+#' 
 #' @return A string padded with leading zeroes
 pad_to_length <- function(s, len) {
   pad_len <- len - nchar(s)
@@ -59,48 +111,4 @@ pad_to_length <- function(s, len) {
   } else {
     s
   }
-}
-
-#' Computes an elliptic curve point for a y-coordinate parity and x-coordinate
-#'
-#' @param y_even A boolean indicating whether the y-coordinate is even
-#' @param x_coordinate The x-coordinate of the point
-#' @param curve The elliptic curve parameters
-#' @return The computed elliptic curve point
-compute_point <- function(y_even, x_coordinate, curve) {
-  # Placeholder for actual computation based on libsecp256k1 elliptic curve functions
-  x <- as.bigz(x_coordinate, base = 16)
-  # Assume a dummy y value here for illustration
-  y <- if (y_even) x else x + 1 # Not an actual implementation
-  list(x = x, y = y)
-}
-
-#' Encodes x and y coordinates in hex to X9.62 format with optional compression
-#'
-#' @param x_coord The x-coordinate in hexadecimal
-#' @param y_coord The y-coordinate in hexadecimal
-#' @param compressed A boolean indicating if compression is to be applied (default: TRUE)
-#' @return The X9.62 encoded public key
-x962_encode <- function(x_coord, y_coord, compressed = TRUE) {
-  x_hex <- pad_hex(x_coord)
-  y_hex <- pad_hex(y_coord)
-  if (!compressed) {
-    paste0("04", x_hex, y_hex)
-  } else {
-    y_even <- (as.bigz(y_hex, base = 16) %% 2) == 0
-    prefix <- if (y_even) "02" else "03"
-    paste0(prefix, pad_to_length(x_hex, 64))
-  }
-}
-
-#' Decodes a DER-encoded ECDSA signature
-#'
-#' @param ecdsa The hexadecimal-encoded ECDSA signature
-#' @return A list with R, S, and recovery values
-DER_decode_ECDSA_signature <- function(ecdsa) {
-  # Placeholder for actual DER decoding logic
-  R <- as.bigz(substr(ecdsa, 1, 64), base = 16)
-  S <- as.bigz(substr(ecdsa, 65, 128), base = 16)
-  recover <- as.integer(substr(ecdsa, 129, 130))
-  list(R = R, S = S, recover = recover)
 }

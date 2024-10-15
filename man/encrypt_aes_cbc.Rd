@@ -2,7 +2,7 @@
 % Please edit documentation in R/aes.R
 \name{encrypt_aes_cbc}
 \alias{encrypt_aes_cbc}
-\title{Encrypt Data Using AES in CBC Mode}
+\title{Encrypt data using AES}
 \usage{
 encrypt_aes_cbc(iv, key, data)
 }
@@ -11,11 +11,13 @@ encrypt_aes_cbc(iv, key, data)
 
 \item{key}{A raw vector of length 32 representing the AES key.}
 
-\item{data}{A raw vector or character string representing the plaintext data to encrypt.}
+\item{data}{A raw vector representing the plaintext data/message to encrypt.}
 }
 \value{
 A raw vector representing the encrypted data.
 }
 \description{
 This function performs AES encryption in CBC mode with PKCS#7 padding.
+It is called from the "encrypt" function below after all the necessary
+conversions and type-checking has been done.
 }

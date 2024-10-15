@@ -1,2 +1,2 @@
-PKG_LIBS = -L/opt/homebrew/lib -lsecp256k1
+PKG_LIBS = -L/opt/homebrew/lib -lsecp256k1 -L/opt/homebrew/lib -lgmp
 PKG_CFLAGS = -I/opt/homebrew/include
