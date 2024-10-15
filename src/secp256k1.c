@@ -3,48 +3,78 @@
 #include "secp256k1.h"
 #include <secp256k1_ecdh.h>     // For ECDH functionalities
 #include <secp256k1_recovery.h>
+#include <gmp.h>
+#include <string.h>
 #include<assert.h>
 
 
 // Function prototypes
-SEXP get_curve_order_R();
+SEXP get_modulus_R();
+SEXP biginteger_to_bytes(SEXP bn_hex);
 SEXP generate_keypair_R();
 SEXP generate_keypair_with_seckey_R(SEXP seckey_R);
 SEXP sign_hash_R(SEXP seckey_R, SEXP hash_R);
 SEXP is_valid_private_key_R(SEXP seckey_R);
 
-// Function to retrieve the curve order
-SEXP get_curve_order_R() {
-  // Create a context for signing and verifying
-  secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
-  
-  // Define the order in bytes as an unsigned char array
-  unsigned char order_bytes[32];
-  
-  // The order of the secp256k1 curve
-  const unsigned char secp256k1_order[32] = {
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE,
-    0xBA, 0xB0, 0xB1, 0x4C, 0x27, 0xB8, 0x19, 0xE3,
-    0xB3, 0x28, 0x3D, 0xD0, 0x74, 0x3A, 0xA6, 0x40,
-    0x41, 0x8B, 0xFA, 0x1D, 0x79, 0x2A, 0x69, 0x69
+// Function to get the modulus (n) as a character string
+SEXP get_modulus_R() {
+  // The order of the secp256k1 curve, defined in bytes
+  const unsigned char secp256k1_n[32] = {
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe,
+    0xba, 0xae, 0xdc, 0xe6, 0xaf, 0x48, 0xa0, 0x3b,
+    0xbf, 0xd2, 0x5e, 0x8c, 0xd0, 0x36, 0x41, 0x41
   };
   
-  // Copy the order to the output array
-  memcpy(order_bytes, secp256k1_order, 32);
+  // Allocate memory for the hex string (2 characters per byte + null terminator)
+  char *hex_string = (char *) malloc(2 * sizeof(secp256k1_n) + 1);
+  if (hex_string == NULL) {
+    error("Memory allocation failed");
+  }
   
-  // Create an R raw vector to hold the order bytes
-  SEXP order_vector = PROTECT(allocVector(RAWSXP, 32));
-  memcpy(RAW(order_vector), order_bytes, 32);
+  // Convert the byte array to a hex string
+  for (size_t i = 0; i < sizeof(secp256k1_n); i++) {
+    sprintf(hex_string + (i * 2), "%02x", secp256k1_n[i]);
+  }
   
-  // Clean up the context to avoid memory leaks
-  secp256k1_context_destroy(ctx);
+  // Create an R character vector to return
+  SEXP result = Rf_mkString(hex_string);
   
-  // Unprotect the R object and return it
-  UNPROTECT(1);
-  return order_vector;
+  // Free allocated memory for the hex string
+  free(hex_string);
+  
+  return result;
 }
 
-// Function to multiply the generator point by a scalar
+
+SEXP biginteger_to_bytes(SEXP bn_hex) {
+  const char* hex_str = CHAR(STRING_ELT(bn_hex, 0)); // Extract hex string from R character object
+  
+  // Initialize the GMP big integer
+  mpz_t bn;
+  mpz_init(bn);
+  
+  // Convert the hex string to a big integer
+  mpz_set_str(bn, hex_str, 16);
+  
+  // Get the size of the byte array
+  size_t len = (mpz_sizeinbase(bn, 2) + 7) / 8;
+  unsigned char* bytes = (unsigned char*) malloc(len);
+  
+  // Convert the big integer to a byte array
+  mpz_export(bytes, &len, 1, 1, 1, 0, bn);
+  
+  // Create an R raw vector and copy the byte array to it
+  SEXP result = PROTECT(allocVector(RAWSXP, len));
+  memcpy(RAW(result), bytes, len);
+  
+  // Clean up
+  free(bytes);
+  mpz_clear(bn);
+  
+  UNPROTECT(1); // Unprotect the raw vector
+  return result; // Return the raw byte array to R
+}
 
 
 // keypair generation function
