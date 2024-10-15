@@ -13,6 +13,7 @@ PROGRESS:
   "biginteger->bytes"             "biginteger_to_bytes"     y               y
   "bytes->biginteger"             "bytes_to_biginteger"     y               y
   "hex->biginteger"               "hex_to_biginteger"       y               y
+  
 NOTE:  the biginteger functions have all been implemented and tested in C; they
 still need to be integerated with the R package.
   
@@ -48,6 +49,7 @@ still need to be integerated with the R package.
 
 
 The following functions work in C.  They still need to be integrated to R with corresponding wrapper functions
+
         secp256k1.cljc
 "valid-private"                                             y               y
 "format-public-key"                                         y               y
