@@ -1,17 +1,22 @@
-
 #' RIPEMD-160 Hashing Function
 #'
 #' This function calculates the RIPEMD-160 hash of the input byte array.
 #'
-#' @param ba A raw vector representing the byte array to be hashed.
+#' @param x A raw vector or character string representing the byte array to be hashed.
 #'
-#' @return A raw vector representing the RIPEMD-160 hash.
+#' @return A raw vector representing the RIPEMD-160 hash is the specified output format.
 #' @import openssl
 #' @examples
-#' hash_ripemd160 <- ripemd_160(charToRaw("hi there!"))
+#' hash_ripemd160 <- ripemd_160("hi there!")
 #'
 #' @export
-ripemd_160 <- function(ba, output_format = "hex") {
+ripemd_160 <- function(x, output_format = "hex") {
+  if (is.character(x)) {
+    ba <- charToRaw(x)
+  } else {
+    ba <- x
+  }
+  
   # Calculate the RIPEMD-160 hash
   hash_raw <- openssl::ripemd160(ba)
 

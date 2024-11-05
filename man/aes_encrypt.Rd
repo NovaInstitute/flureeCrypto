@@ -16,7 +16,7 @@ aes_encrypt(
 
 \item{key}{The encryption key. This can be a character string (hashed into a 256-bit key) or a raw vector.}
 
-\item{iv}{An optional vector of unsigned bytes of size 16 to be used as the initialization vector. Defaults to a predefined IV.}
+\item{iv}{An optional numeric vector of unsigned bytes of size 16 to be used as the initialization vector. Defaults to a predefined IV.}
 
 \item{output_format}{The desired format for the encrypted output: "hex", "base64" or "none". Defaults to "hex".}
 }

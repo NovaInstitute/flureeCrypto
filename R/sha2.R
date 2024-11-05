@@ -1,4 +1,3 @@
-
 #' SHA-256 Hashing Function
 #'
 #' This function calculates the SHA-256 hash of the input.

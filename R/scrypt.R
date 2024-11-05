@@ -16,17 +16,23 @@ random_bytes <- function(size) {
 #' Returns the encrypted message in bytes directly. The encrypted output can be
 #' verified using the same salt and scrypt parameters.
 #'
-#' @param raw A raw vector containing the message to encrypt.
-#' @param salt A raw vector containing the salt to use (default random 16 bytes).
+#' @param msg A raw vector or character string containing the message to encrypt.
+#' @param salt A numeric vector containing the salt to use (default random 16 bytes).
 #' @param n Integer. CPU/memory cost factor (default 32768).
 #' @param r Integer. Block size factor (default 8).
 #' @param p Integer. Parallelization factor (default 1).
 #' @param dk_len Integer. Length of the derived key (default 32).
 #' @return A raw vector containing the encrypted message.
 #' @export
-encrypt <- function(raw, salt = random_bytes(16), n = 32768, r = 8, p = 1, dk_len = 32) {
-  salt <- map_signed_to_unsigned(salt)
-  scrypt::scrypt(raw, salt, n, r, p, length = dk_len)
+scrypt_encrypt <- function(msg, salt = random_bytes(16), n = 32768, r = 8, p = 1, dk_len = 32) {
+  if (is.character(msg)) {
+    msg_bytes <- charToRaw(msg)
+  } else {
+    msg_bytes <- msg
+  }
+  salt <- as.raw(map_signed_to_unsigned(salt))
+  encrypted <- scrypt::scrypt(msg_bytes, salt, n, r, p, length = dk_len)
+  return(bin2hex(encrypted))
 }
 
 #' Check Encrypted Message
@@ -34,17 +40,21 @@ encrypt <- function(raw, salt = random_bytes(16), n = 32768, r = 8, p = 1, dk_le
 #' Compares a raw message (bytes) with a previously encrypted message (bytes) that was encrypted
 #' using the specified salt and scrypt parameters. Returns TRUE if the two match, otherwise FALSE.
 #'
-#' @param raw A raw vector containing the original message.
+#' @param msg A raw vector or character string containing the original message.
 #' @param encrypted A raw vector containing the encrypted message.
-#' @param salt A raw vector containing the salt used during encryption.
+#' @param salt A numeric vector containing the salt used during encryption.
 #' @param n Integer. CPU/memory cost factor used during encryption (default 32768).
 #' @param r Integer. Block size factor used during encryption (default 8).
 #' @param p Integer. Parallelization factor used during encryption (default 1).
 #' @return Logical. TRUE if the raw message matches the encrypted message, FALSE otherwise.
 #' @export
-check <- function(raw, encrypted, salt, n = 32768, r = 8, p = 1) {
-  dk_len <- length(encrypted)
-  salt <- map_signed_to_unsigned(salt)
-  test_encrypted <- encrypt(raw, salt, n, r, p, dk_len)
+scrypt_check <- function(msg, encrypted, salt, n = 32768, r = 8, p = 1) {
+  if (is.character(msg)) {
+    msg_bytes <- charToRaw(msg)
+  } else {
+    msg_bytes <- msg
+  }
+  dk_len <- (nchar(encrypted))/2
+  test_encrypted <- scrypt_encrypt(msg_bytes, salt, n, r, p, dk_len)
   identical(encrypted, test_encrypted)
 }

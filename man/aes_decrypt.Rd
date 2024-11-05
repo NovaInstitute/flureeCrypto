@@ -17,7 +17,7 @@ aes_decrypt(
 
 \item{key}{The decryption key as a character string or raw vector. It will be hashed to 256 bits if provided as a string.}
 
-\item{iv}{A raw vector representing the initialization vector (IV). Defaults to a pre-defined 16-byte vector.}
+\item{iv}{A numeric vector representing the initialization vector (IV). Defaults to a pre-defined 16-byte vector.}
 
 \item{input_format}{The format of the encrypted input. Options are "hex" (default) or "base64".}
 

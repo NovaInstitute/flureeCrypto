@@ -4,7 +4,7 @@
 \alias{sha3_512}
 \title{SHA3-512 Hashing Function with Output Format}
 \usage{
-sha3_512(x, output_format = c("hex", "base64", "raw"), input_format = NULL)
+sha3_512(x, output_format = c("hex", "base64", "raw")[1], input_format = NULL)
 }
 \arguments{
 \item{x}{The input to be hashed, either a character string or a raw vector.}

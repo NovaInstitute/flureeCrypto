@@ -1,4 +1,5 @@
-#' @title HMAC-SHA256
+
+#' HMAC-SHA256
 #' @description Returns HMAC using SHA-256 hashing. Both key and message should be raw vectors.
 #'
 #' @param message A raw vector representing the message.

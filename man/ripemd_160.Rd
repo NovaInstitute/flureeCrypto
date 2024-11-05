@@ -4,18 +4,18 @@
 \alias{ripemd_160}
 \title{RIPEMD-160 Hashing Function}
 \usage{
-ripemd_160(ba, output_format = "hex")
+ripemd_160(x, output_format = "hex")
 }
 \arguments{
-\item{ba}{A raw vector representing the byte array to be hashed.}
+\item{x}{A raw vector or character string representing the byte array to be hashed.}
 }
 \value{
-A raw vector representing the RIPEMD-160 hash.
+A raw vector representing the RIPEMD-160 hash is the specified output format.
 }
 \description{
 This function calculates the RIPEMD-160 hash of the input byte array.
 }
 \examples{
-hash_ripemd160 <- ripemd_160(charToRaw("hi there!"))
+hash_ripemd160 <- ripemd_160("hi there!")
 
 }

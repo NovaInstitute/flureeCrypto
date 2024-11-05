@@ -1,3 +1,4 @@
+
 #' Encrypt data using AES
 #'
 #' This function performs AES encryption in CBC mode with PKCS#7 padding.
@@ -30,7 +31,7 @@ encrypt_aes_cbc <- function(iv, key, data) {
 #'
 #' @param x The input data to encrypt. This can be a character string or a raw vector.
 #' @param key The encryption key. This can be a character string (hashed into a 256-bit key) or a raw vector.
-#' @param iv An optional vector of unsigned bytes of size 16 to be used as the initialization vector. Defaults to a predefined IV.
+#' @param iv An optional numeric vector of unsigned bytes of size 16 to be used as the initialization vector. Defaults to a predefined IV.
 #' @param output_format The desired format for the encrypted output: "hex", "base64" or "none". Defaults to "hex".
 #' 
 #' @return The encrypted data in the specified output format.
@@ -39,21 +40,18 @@ encrypt_aes_cbc <- function(iv, key, data) {
 aes_encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42), output_format = "hex") {
   # If the provided key is a string, hash it into a 256-bit key (32 raw bytes).
   if (is.character(key)) {
-    key_ba <- as.raw(hash_string_key(key))
+    k <- hash_string_key(key)
+    # convert to unsigned bytes (to get rid of possible negative values)
+    k <- map_signed_to_unsigned(k)
+    key_ba <- as.raw(k)
   } else if (is.raw(key)) {
     key_ba <- key
   } else {
     stop("Encryption key should be a character string or raw byte array.")
   }
   
-  print(iv)
-  iv <- map_excess_127(iv)
-  print(iv)
-  
-  # Convert the initialisation vector to a raw vector if it is not already.
-  if (!is.raw(iv)) {
-    iv <- as.raw(iv)
-  }
+  # Convert iv to unsigned bytes (to get rid of possible negative values)
+  iv <- map_signed_to_unsigned(iv)
   
   # Convert the input data to raw bytes if it's a character string.
   if (is.character(x)) {
@@ -112,7 +110,7 @@ decrypt_aes_cbc <- function(iv, key, encrypted_data) {
 #'
 #' @param x The input to be decrypted, either a character string or a raw vector.
 #' @param key The decryption key as a character string or raw vector. It will be hashed to 256 bits if provided as a string.
-#' @param iv A raw vector representing the initialization vector (IV). Defaults to a pre-defined 16-byte vector.
+#' @param iv A numeric vector representing the initialization vector (IV). Defaults to a pre-defined 16-byte vector.
 #' @param input_format The format of the encrypted input. Options are "hex" (default) or "base64".
 #' @param output_format The format of the output. Options are "string" (default), "hex", or "none" for raw bytes.
 #'
@@ -124,7 +122,10 @@ aes_decrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8
 
   # Convert the key to a 256-bit hash if it's a character string
   if (is.character(key)) {
-    key_ba <- as.raw(hash_string_key(key))
+    k <- hash_string_key(key)
+    # convert to unsigned bytes (to get rid of possible negative values)
+    k <- map_signed_to_unsigned(k)
+    key_ba <- as.raw(k)
   } else if (is.raw(key)) {
     key_ba <- key
   } else {

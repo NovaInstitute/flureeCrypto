@@ -1,5 +1,3 @@
-# fluree.crypto.sha3=> (println (alphabase/bytes->hex (sha3-256 (.getBytes "hello"))))
-# 3338be694f50c5f338814986cdf0686453a888b84f424d792af4b9202398f392
 
 #' SHA3-256 Hashing Function
 #'
@@ -91,7 +89,7 @@ sha3_256_normalize <- function(s, output_format = "hex") {
 #' # fluree.crypto.sha3=> (println (alphabase/bytes->hex (sha3-512 (.getBytes "hello"))))
 #' # 75d527c368f2efe848ecf6b073a36767800805e9eef2b1857d5f984f036eb6df891d75f72d9b154518c1cd58835286d1da9a38deba3de98b5a53e5ed78a84976
 #' @export
-sha3_512 <- function(x, output_format = c("hex", "base64", "raw"), input_format = NULL) {
+sha3_512 <- function(x, output_format = c("hex", "base64", "raw")[1], input_format = NULL) {
 
   # Determine the input format if not provided
   if (is.null(input_format)) {

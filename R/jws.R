@@ -1,4 +1,3 @@
-library(jose)
 
 #' Base64 URL encode function
 #'

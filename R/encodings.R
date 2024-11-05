@@ -1,4 +1,3 @@
-library(gmp)
 #' Pads a hexadecimal string with a leading zero if the length is odd
 #'
 #' @param hex A hexadecimal string
@@ -14,7 +13,6 @@ pad_hex <- function(hex) {
   }
 }
 
-library(gmp)
 #' Convert BigInteger to Byte Array
 #'
 #' This function converts a GMP big integer to a raw byte array.
@@ -50,6 +48,7 @@ biginteger_to_hex <- function(bn) {
   hex_string <- .Call("biginteger_to_hex_R", bn)  # Call to C function
   return(hex_string)
 }
+
 
 #' Convert the first byte of a raw byte vector to an integer
 #'
