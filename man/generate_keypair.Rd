@@ -2,21 +2,31 @@
 % Please edit documentation in R/secp256k1.R
 \name{generate_keypair}
 \alias{generate_keypair}
-\title{Generate Key Pair}
+\title{Generate a key pair}
 \usage{
-generate_keypair(seckey_r = NULL, output_format = c("hex", "base64", "raw")[1])
+generate_keypair(priv_key = NULL, output_format = c("hex", "base64", "raw")[1])
 }
 \arguments{
-\item{seckey_r}{Optional. A raw vector containing the 32-byte secret key.}
+\item{priv_key}{Optional raw vector containing the 32-byte private key.}
 }
 \value{
 A list with:
 \itemize{
-\item \code{seckey}: A raw vector containing the 32-byte secret key (only if no key was provided).
-\item \code{pubkey}: A raw vector containing the 65-byte uncompressed public key.
+\item \code{privkey}: A hexadecimal string representing the 32-byte private key.
+\item \code{pubkey}: A hexadecimal string representing the 32-byte compressed public key.
 }
 }
 \description{
-Generates a secp256k1 key pair. If a secret key is provided, the function generates
-the corresponding public key. If no secret key is provided, it generates a new key pair.
+Generates a secp256k1 key pair by calling on the corresponding C function.
+If a private key is provided, the function generates
+the corresponding public key.
+If no private key is provided, it generates a new key pair.
+}
+\examples{
+# new_kp <- generate_keypair()
+# generated_private_key <- new_kp[[1]]
+# generated_public_key <- new_kp[[2]]
+
+# new_kp_given_private_key <- generate_keypair("6a5f415f49986006815ae7887016275aac8ffb239f9a2fa7172300578582b6c2")
+
 }

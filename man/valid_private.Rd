@@ -2,7 +2,7 @@
 % Please edit documentation in R/secp256k1.R
 \name{valid_private}
 \alias{valid_private}
-\title{Validate Private Key}
+\title{Validate private key}
 \usage{
 valid_private(private_key_hex)
 }
@@ -10,8 +10,15 @@ valid_private(private_key_hex)
 \item{private_key_hex}{A string representing the private key in hexadecimal format.}
 }
 \value{
-An integer scalar (1 if valid, 0 otherwise).
+An integer (1 if valid, 0 otherwise).
 }
 \description{
-Checks if a provided private key (hexadecimal string) is valid on the secp256k1 curve.
+This wrapper function calls its corresponding C function which
+checks if a provided private key is valid on the secp256k1 curve.
+}
+\examples{
+# if (valid_private("6a5f415f49986006815ae7887016275aac8ffb239f9a2fa7172300578582b6c2")) {
+#   print("Private key is valid")
+# }
+
 }

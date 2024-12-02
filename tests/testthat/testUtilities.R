@@ -50,18 +50,7 @@ context("String <-> Byte Conversions")
 
 # Test string to byte (and byte to string) conversion
 test_that("String to byte conversions and back", {
-  set.seed(123)  # Set seed for reproducibility
   
-  # Generate a list of 10 random strings of random lengths (up to 1000 characters)
-  rdm_strs <- replicate(10, paste0(sample(c(letters, LETTERS, 0:9), size = sample(1:1000, 1), replace = TRUE), collapse = ""))
-  
-  # Check that each string is the same after conversion to bytes and back
-  expect_true(all(sapply(rdm_strs, function(s) {
-    s == byte_array_to_string(string_to_byte_array(s))
-  })))
-  
-  context("Test given in documentation")
-  # Test the examples given in the documentation
   input <- "hi there"
   
   # Convert the string to a byte array

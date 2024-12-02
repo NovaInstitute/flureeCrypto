@@ -2,13 +2,18 @@
 % Please edit documentation in R/secp256k1.R
 \name{generate_seckey}
 \alias{generate_seckey}
-\title{Generate Secret Key}
+\title{Generate private key}
 \usage{
 generate_seckey(output_format = c("hex", "base64", "raw")[1])
 }
 \value{
-A raw vector containing the 32-byte secret key.
+A raw vector containing the 32-byte private key.
 }
 \description{
-Generates a random 32-byte secret key that is valid on the secp256k1 curve.
+This wrapper function calls its corresponding C function which generates a
+random 32-byte private key that is valid on the secp256k1 curve.
+}
+\examples{
+# new_random_key <- generate_seckey(output_format = hex)
+
 }

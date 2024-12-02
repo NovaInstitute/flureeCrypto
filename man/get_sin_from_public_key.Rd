@@ -7,8 +7,7 @@
 get_sin_from_public_key(pub_key, output_format = "base58")
 }
 \arguments{
-\item{pub_key}{A character string or raw vector representing the public key.
-If a character string, it should be in hexadecimal format and will be converted to raw.}
+\item{pub_key}{A character string (hexadecimal format) or raw vector representing the public key.}
 
 \item{output_format}{A character string specifying the output format.
 Can be "hex" (hexadecimal string), "raw" (raw byte vector), or "base58" (Base58Check encoded string).
@@ -23,12 +22,11 @@ The SIN in the specified format. The output will be:
 }
 }
 \description{
-This function generates a SIN from a given public key by applying
-SHA-256 and RIPEMD-160 hash functions, appending version bytes, and adding a checksum.
+This function generates a SIN from a given public key by leveraging the
+SHA-256 and RIPEMD-160 hash functions.
 }
 \examples{
-# Example usage with a hexadecimal public key
-pub_key_hex <- "04bfcab45a58b09f12a87f6a736c19a65a..."
-get_sin_from_public_key(pub_key_hex, output_format = "base58")
+# pub_key_hex <- "02991719b37817f6108fc8b0e824d3a9daa3d39bc97ecfd4f8bc7ef3b71d4c6391"
+# sin <- get_sin_from_public_key(pub_key_hex, output_format = "base58")
 
 }

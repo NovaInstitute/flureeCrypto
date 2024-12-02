@@ -2,23 +2,25 @@
 % Please edit documentation in R/utilityFunctions.R
 \name{map_excess_127}
 \alias{map_excess_127}
-\title{Map Excess-127 Function}
+\title{Map excess-127}
 \usage{
-map_excess_127(ba)
+map_excess_127(v)
 }
 \arguments{
-\item{iv}{A numeric vector containing integer values.}
+\item{v}{A numeric vector.}
 }
 \value{
 A numeric vector with transformed values.
 }
 \description{
 This function takes a vector of integers and transforms each element:
-If an element is greater than 127, it subtracts 256 from that element;
-otherwise, it leaves the element unchanged. This represents an Excess-127 format.
+if an element is greater than 127, it subtracts 256 from that element
+otherwise, it leaves the element unchanged.
+This represents the excess-127 format of signed bytes.
 }
 \examples{
-iv <- c(130, 120, 127, 255)
-result <- map_excess_127(iv)
-print(result)  # Output: [1] -126 120 127 -1
+# v <- c(130, 120, 127, 255)
+# result <- map_excess_127(v)
+# print(result)
+
 }

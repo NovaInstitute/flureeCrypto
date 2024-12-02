@@ -2,26 +2,26 @@
 % Please edit documentation in R/utilityFunctions.R
 \name{string_to_byte_array}
 \alias{string_to_byte_array}
-\title{Convert a String to a Byte Array}
+\title{Convert a string to a byte array}
 \usage{
 string_to_byte_array(s)
 }
 \arguments{
-\item{s}{A character string or a raw vector. The string will be normalized and converted to a byte array.}
+\item{s}{A character string or a raw vector. The string will be normalized before being converted to a byte array.}
 }
 \value{
 A raw vector representing the byte array.
 }
 \description{
-This function normalizes a string and then converts it to a byte array (raw vector).
+This function normalizes a string and then converts it to a byte array.
 If the input is already a byte array, it returns the original value.
 }
 \examples{
-byte_array <- string_to_byte_array("Café")
-print(byte_array)
+# byte_array <- string_to_byte_array("Åpple")
+# print(byte_array)
 
-raw_input <- as.raw(1:5)
-byte_array <- string_to_byte_array(raw_input)
-print(byte_array)  # Should print the original raw vector
+# raw_input <- as.raw(1:5)
+# byte_array <- string_to_byte_array(raw_input)
+# print(byte_array)
 
 }

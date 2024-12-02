@@ -2,23 +2,23 @@
 % Please edit documentation in R/utilityFunctions.R
 \name{map_signed_to_unsigned}
 \alias{map_signed_to_unsigned}
-\title{Map Signed to Unsigned Function}
+\title{Map signed to unsigned bytes}
 \usage{
 map_signed_to_unsigned(ba)
 }
 \arguments{
-\item{salt_bytes}{A numeric vector containing integer values.}
+\item{v}{A numeric vector.}
 }
 \value{
 A numeric vector with negative integers replaced.
 }
 \description{
 This function takes a vector of integers and replaces negative integers
-with their positive counterparts (by adding 256) while leaving other
-integers unchanged.
+with their positive counterparts (by adding 256).
 }
 \examples{
-salt_bytes <- c(-5, 0, 10, -128, 255)
-result <- map_signed_to_unsigned(salt_bytes)
-print(result)  # Output: [1] 251 0 10 128 255
+# v <- c(-5, 0, 10, -128, 255)
+# result <- map_signed_to_unsigned(v)
+# print(result)
+
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilityFunctions.R
 \name{normalize_string}
 \alias{normalize_string}
-\title{Normalize a String for Consistent Hashing}
+\title{Normalize a string}
 \usage{
 normalize_string(s)
 }
@@ -14,9 +14,10 @@ A character string that has been normalized to the NFKC form.
 }
 \description{
 This function normalizes a string using the NFKC normalization form.
+The normalized form of the string will result in consistent hashing.
 }
 \examples{
-normalized_string <- normalize_string("Café")
-print(normalized_string)
+# normalized_string <- normalize_string("\u0041\u030apple")
+# print(normalized_string)
 
 }

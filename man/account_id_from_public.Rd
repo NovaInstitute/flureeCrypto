@@ -2,24 +2,21 @@
 % Please edit documentation in R/secp256k1.R
 \name{account_id_from_public}
 \alias{account_id_from_public}
-\title{Generate Account ID from Public Key}
+\title{Generate account ID from a public key}
 \usage{
 account_id_from_public(pub_key)
 }
 \arguments{
-\item{pub_key}{A raw vector or character string representing the public key.
-This public key will be used to derive the account ID.}
+\item{pub_key}{A raw vector or hexadecimal character string representing the public key.}
 }
 \value{
-A character string representing the account ID in the specified format
-(typically base58).
+A character string representing the account ID in base58 encoded format.
 }
 \description{
 This function generates an account identifier (SIN) from a given public key.
 }
 \examples{
-# Example usage:
-# Assuming `pub_key` is your public key in raw or hex format
-account_id <- account_id_from_public(pub_key)
+# pubkey = "02991719b37817f6108fc8b0e824d3a9daa3d39bc97ecfd4f8bc7ef3b71d4c6391"
+# account_id <- account_id_from_public(pub_key)
 
 }

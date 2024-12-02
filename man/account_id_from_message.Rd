@@ -2,17 +2,15 @@
 % Please edit documentation in R/secp256k1.R
 \name{account_id_from_message}
 \alias{account_id_from_message}
-\title{Generate Account ID from Message Signature}
+\title{Generate account ID from a signature}
 \usage{
-account_id_from_message(hex_signature, msg)
+account_id_from_message(msg, sig)
 }
 \arguments{
+\item{msg}{A character string or raw vector representing the original message.}
+
 \item{hex_signature}{A character string representing the signature of the message
 in hexadecimal format.}
-
-\item{msg}{A character string or raw vector representing the original message.
-If a character string is provided, it will be hashed to produce a suitable
-key for recovery.}
 }
 \value{
 A character string representing the account ID derived from the
@@ -21,10 +19,11 @@ recovered public key.
 \description{
 This function generates an account identifier (SIN) by recovering the public key
 from a message's signature and then deriving the account ID from the recovered key.
+The signature should be DER encode prepended by the recovery byte.
 }
 \examples{
-# Example usage:
-# Assuming `hex_signature` is the hexadecimal signature of `msg`
-account_id <- account_id_from_message(hex_signature, msg)
+# msg = "hi there"
+# hex_signature = "1b3046022100cbd32e463567fefc2f120425b0224d9d263008911653f50e83953f47cfbef3bc022100fcf81206277aa1b86d2667b4003f44643759b8f4684097efd92d56129cd89ea8"
+# account_id <- account_id_from_message(hex_signature, msg)
 
 }

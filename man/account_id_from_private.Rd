@@ -2,25 +2,22 @@
 % Please edit documentation in R/secp256k1.R
 \name{account_id_from_private}
 \alias{account_id_from_private}
-\title{Generate Account ID from Private Key}
+\title{Generate account ID from a private key}
 \usage{
 account_id_from_private(priv_key)
 }
 \arguments{
-\item{priv_key}{A raw vector or character string representing the private key.
-This private key will be used to derive the account ID.}
+\item{priv_key}{A raw vector or hexadecimal character string representing the private key.}
 }
 \value{
-A character string representing the account ID in the specified format
-(typically base58).
+A character string representing the account ID in base58 encoded format.
 }
 \description{
 This function generates an account identifier (SIN) from a given private key by
 first deriving the corresponding public key, then creating the account ID.
 }
 \examples{
-# Example usage:
-# Assuming `priv_key` is your private key in raw or hex format
-account_id <- account_id_from_private(priv_key)
+# priv_key = "6a5f415f49986006815ae7887016275aac8ffb239f9a2fa7172300578582b6c2"
+# account_id <- account_id_from_private(priv_key)
 
 }

@@ -9,7 +9,6 @@
 #' @examples
 #' hash_ripemd160 <- ripemd_160("hi there!")
 #'
-#' @export
 ripemd_160 <- function(x, output_format = "hex") {
   if (is.character(x)) {
     ba <- charToRaw(x)

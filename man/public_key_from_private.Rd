@@ -2,13 +2,12 @@
 % Please edit documentation in R/secp256k1.R
 \name{public_key_from_private}
 \alias{public_key_from_private}
-\title{Derive Public Key from Private Key}
+\title{Derive a public key from a private key}
 \usage{
 public_key_from_private(priv_key)
 }
 \arguments{
-\item{priv_key}{A raw vector or character string representing the private key.
-This private key will be used to derive the corresponding public key.}
+\item{priv_key}{A raw vector or hexadecimal character string representing the private key.}
 }
 \value{
 A raw vector representing the public key derived from the private key.
@@ -17,8 +16,7 @@ A raw vector representing the public key derived from the private key.
 This function generates a public key from a given private key by creating a key pair.
 }
 \examples{
-# Example usage:
-# Assuming `priv_key` is your private key in raw or hex format
-public_key <- public_key_from_private(priv_key)
+# priv_key = "6a5f415f49986006815ae7887016275aac8ffb239f9a2fa7172300578582b6c2"
+# public_key <- public_key_from_private(priv_key)
 
 }

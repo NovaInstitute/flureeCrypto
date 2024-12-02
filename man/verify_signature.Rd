@@ -2,7 +2,7 @@
 % Please edit documentation in R/secp256k1.R
 \name{verify_signature}
 \alias{verify_signature}
-\title{Verify a Signature from a Hash}
+\title{Verify a signature from a hash}
 \usage{
 verify_signature(pub_key, message, sig)
 }
@@ -11,18 +11,21 @@ verify_signature(pub_key, message, sig)
 
 \item{message}{A character string representing the original message.}
 
-\item{signature}{A character string representing the signature in hexadecimal format,
-assumed to be DER-encoded with a recovery byte.}
+\item{signature}{A character string representing the signature in hexadecimal format.}
 }
 \value{
 TRUE if the signature is valid for the given public key and hash,
-otherwise throws an error.
+otherwise stops with an error message.
 }
 \description{
 Verifies that a signature is valid for a given public key and hash.
+The signature is assumed to be in DER encoded format prepended by a recovery byte.
 }
 \examples{
-# Example usage:
-# verify(pub_key, message, sig)
+# pub_key = "02991719b37817f6108fc8b0e824d3a9daa3d39bc97ecfd4f8bc7ef3b71d4c6391"
+# message = "hi there"
+# sig = "1c304402207eb1cbcdaaf623121e97abbf4018200628a7abba796f403edf01a367d908d88302205a790d706c70b9d0f657bf7a4a7b5c04808825ba0ce227bff33a0fdb3eab1ac0"
+
+# verify_signature(pub_key, message, sig)
 
 }

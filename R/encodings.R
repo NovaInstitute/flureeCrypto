@@ -4,7 +4,6 @@
 #' 
 #' @return A padded hexadecimal string with a leading zero if necessary
 #' 
-#' @export
 pad_hex <- function(hex) {
   if (nchar(hex) %% 2 == 1) {
     paste0("0", hex)
@@ -19,7 +18,7 @@ pad_hex <- function(hex) {
 #'
 #' @param bn A GMP big integer (from the `gmp` library in R).
 #' @return A raw byte array representing the big integer.
-#' @export
+#' 
 biginteger_to_bytes <- function(bn) {
   # Ensure it's a gmp bigz object
   if (!inherits(bn, "bigz")) {
@@ -37,7 +36,6 @@ biginteger_to_bytes <- function(bn) {
 #'
 #' @param bn A big integer value (as an R numeric or character)
 #' @return A string representing the hexadecimal value of the big integer
-#' @export
 biginteger_to_hex <- function(bn) {
   # Ensure bn is of type biginteger
   if (!inherits(bn, "bigz")) {

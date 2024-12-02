@@ -1,6 +1,7 @@
 
 #' Encrypt data using AES
-#'
+#' 
+#' @description
 #' This function performs AES encryption in CBC mode with PKCS#7 padding.
 #' It is called from the "encrypt" function below after all the necessary 
 #' conversions and type-checking has been done.
@@ -11,7 +12,6 @@
 #' 
 #' @return A raw vector representing the encrypted data.
 #' 
-#' @export
 encrypt_aes_cbc <- function(iv, key, data) {
   
   # Perform AES encryption in CBC mode
@@ -25,6 +25,7 @@ encrypt_aes_cbc <- function(iv, key, data) {
 
 #' Prepare data for AES encryption
 #' 
+#' @description
 #' This function does the necessary type-checking and conversions of parameters
 #' and then passes them to "encrypt_aes_cbc" for AES encryption.
 #' It also transforms the result to the specified/default output format.
@@ -78,7 +79,8 @@ aes_encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8
 
 
 #' Decrypt data using AES
-#'
+#' 
+#' @description
 #' This function decrypts a message using AES decryption in CBC mode with PKCS7 padding.
 #' It receives the necessary input from the "decrypt" function after all the 
 #' necessary type-checking and conversions have been done.
@@ -89,7 +91,6 @@ aes_encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8
 #'
 #' @return The character string representation of the decrypted data.
 #' 
-#' @export
 decrypt_aes_cbc <- function(iv, key, encrypted_data) {
   
   # Perform AES decryption in CBC mode with PKCS7 padding
@@ -103,6 +104,7 @@ decrypt_aes_cbc <- function(iv, key, encrypted_data) {
 
 #' Data conversion before and after AES decryption
 #'
+#' @description
 #' Decrypts the input using AES decryption in CBC mode with PKCS7 padding. 
 #' The key is hashed to 256 bits.
 #' An alternate initialization vector (IV) of unsigned bytes of size 16 my be 

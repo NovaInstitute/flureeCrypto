@@ -8,7 +8,6 @@
 #'
 #' @return A raw vector containing the HMAC-SHA256 result.
 #' @import digest
-#' @export
 #' @examples
 #' # => (require '[alphabase.core :as alphabase])
 #' # => (def message (.getBytes "hello"))

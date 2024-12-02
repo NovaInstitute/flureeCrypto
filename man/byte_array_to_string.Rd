@@ -2,22 +2,22 @@
 % Please edit documentation in R/utilityFunctions.R
 \name{byte_array_to_string}
 \alias{byte_array_to_string}
-\title{Convert a Byte Array to a String}
+\title{Convert a byte array to a string}
 \usage{
-byte_array_to_string(s)
+byte_array_to_string(v)
 }
 \arguments{
-\item{s}{A raw vector representing the byte array to be converted to a string.}
+\item{v}{A raw vector representing the byte array to be converted to a string.}
 }
 \value{
 A character string that corresponds to the byte array.
 }
 \description{
-This function converts a byte array (raw vector) back into a string.
+This function converts a byte array (raw vector) into a string.
 }
 \examples{
-raw_input <- charToRaw("Hello, world!")
-string_output <- byte_array_to_string(raw_input)
-print(string_output)  # Should print "Hello, world!"
+# raw_input <- charToRaw("Hello, world!")
+# string_output <- byte_array_to_string(raw_input)
+# print(string_output)
 
 }

@@ -16,7 +16,7 @@ scrypt_encrypt(
 \arguments{
 \item{msg}{A raw vector or character string containing the message to encrypt.}
 
-\item{salt}{A raw vector containing the salt to use (default random 16 bytes).}
+\item{salt}{A numeric vector containing the salt to use (default random 16 bytes).}
 
 \item{n}{Integer. CPU/memory cost factor (default 32768).}
 

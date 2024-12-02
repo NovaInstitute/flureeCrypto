@@ -2,18 +2,25 @@
 % Please edit documentation in R/secp256k1.R
 \name{public_key_from_message}
 \alias{public_key_from_message}
-\title{Recover Public Key from Signature}
+\title{Recover public key from a signature}
 \usage{
-public_key_from_message(hex_signature, msg)
+public_key_from_message(msg, sig)
 }
 \arguments{
-\item{hex_signature}{A string representing the ECDSA signature in hexadecimal format, including the recovery byte.}
-
 \item{msg}{A character string or raw vector representing the message hash that was signed.}
+
+\item{sig}{A string representing the signature in hexadecimal format.}
 }
 \value{
-A raw vector containing the 65-byte compressed public key if the recovery is successful.
+A hexadecimal string representing the 32-byte compressed public key if the recovery was successful.
 }
 \description{
 Recovers the public key associated with a given ECDSA signature and message hash on the secp256k1 curve.
+The signature is assumed to be DER encoded with a prepended recovery byte.
+}
+\examples{
+# msg = "hi there"
+# sig = "1c304402207eb1cbcdaaf623121e97abbf4018200628a7abba796f403edf01a367d908d88302205a790d706c70b9d0f657bf7a4a7b5c04808825ba0ce227bff33a0fdb3eab1ac0"
+# recovered_public_key <- public_key_from_message(msg, sig)
+
 }

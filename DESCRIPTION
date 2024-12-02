@@ -1,5 +1,5 @@
 Package: flureeCrypto
-Title: Crypto Functions fro Fluree based in clojure originals
+Title: Crypto Functions from Fluree based in clojure originals
 Version: 0.0.0.9000
 Authors@R: person("Christiaan Pauw",
                   email = "cjpauw@gmail.com",

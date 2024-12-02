@@ -2,12 +2,12 @@
 % Please edit documentation in R/utilityFunctions.R
 \name{hash_string_key}
 \alias{hash_string_key}
-\title{Hash a String Key Using SHA3-512 and Return Specified Number of Bytes}
+\title{Hash a string key}
 \usage{
 hash_string_key(key, n = 32)
 }
 \arguments{
-\item{key}{A character string or raw vector to be hashed. If it's a string, it will be converted to raw bytes.}
+\item{key}{A character string or raw vector to be hashed.}
 
 \item{n}{An integer specifying the number of bytes to return from the hash. Must be between 1 and 64 (default is 32).}
 }
@@ -15,18 +15,11 @@ hash_string_key(key, n = 32)
 A raw vector containing the first \code{n} bytes of the SHA3-512 hash.
 }
 \description{
-This function takes a string key, hashes it using the SHA3-512 algorithm, and returns the first \code{n} bytes of the hash.
+This function takes a string key, hashes it using the SHA3-512 algorithm
+and returns the first \code{n} bytes of the resulting hash.
 }
 \examples{
-R usage:
-hash_string_key("hello", 32)
-hash_string_key(charToRaw("example-key"), 16)
-
-Clojure usage:
-# fluree.crypto.util=> (hash-string-key "hello" 32)
-# (117 -43 39 -61 104 -14 -17 -24 72 -20 -10 -80 115 -93 103 103 -128 8 5 
--23 -18 -14 -79 -123 125 95 -104 79 3 110 -74 -33)
-# fluree.crypto.util=> (hash-string-key "example-key" 16)
-# (-1 115 100 -51 32 13 -97 54 15 -13 -70 41 -90 -10 93 4)
+# hash_string_key("hello", 32)
+# hash_string_key(charToRaw("example-key"), 16)
 
 }

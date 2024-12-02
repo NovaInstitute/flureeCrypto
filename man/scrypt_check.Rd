@@ -11,7 +11,7 @@ scrypt_check(msg, encrypted, salt, n = 32768, r = 8, p = 1)
 
 \item{encrypted}{A raw vector containing the encrypted message.}
 
-\item{salt}{A raw vector containing the salt used during encryption.}
+\item{salt}{A numeric vector containing the salt used during encryption.}
 
 \item{n}{Integer. CPU/memory cost factor used during encryption (default 32768).}
 

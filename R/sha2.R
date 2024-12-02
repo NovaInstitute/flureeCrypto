@@ -142,8 +142,3 @@ sha2_512_normalize <- function(s, output_format = "hex") {
 
   return(hash_result)
 }
-
-# Load the necessary packages
-library(digest)
-library(sodium)
-

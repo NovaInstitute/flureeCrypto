@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilityFunctions.R
 \name{coerce_input_format}
 \alias{coerce_input_format}
-\title{Coerce Input Format}
+\title{Coerce input format}
 \usage{
 coerce_input_format(x)
 }
@@ -13,13 +13,14 @@ coerce_input_format(x)
 A character string indicating the format, either "string" or "bytes".
 }
 \description{
-This function checks whether the input is a string or bytes and returns a label indicating the format.
+This function checks whether the input is a string or raw bytes and returns
+a label indicating the format.
 }
 \examples{
-input_format <- coerce_input_format("Hello, world!")
-print(input_format)  # Should print "string"
+# input_format <- coerce_input_format("Hello, world!")
+# print(input_format)
 
-input_format <- coerce_input_format(as.raw(1:5))
-print(input_format)  # Should print "bytes"
+# input_format <- coerce_input_format(as.raw(1:5))
+# print(input_format)
 
 }
