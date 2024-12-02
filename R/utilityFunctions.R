@@ -141,7 +141,7 @@ string_to_byte_array <- function(s) {
 #'
 #' @export
 byte_array_to_string <- function(v) {
-  if (is.raw(s)) {
+  if (is.raw(v)) {
     # Input is already a raw vector, convert to string
     return(rawToChar(v))
   } else if (is.numeric(v)) {
