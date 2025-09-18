@@ -2,7 +2,7 @@
 % Please edit documentation in R/jws.R
 \name{serialize_jws}
 \alias{serialize_jws}
-\title{Create JWS Compact Serialization}
+\title{Create a JWS Compact Serialization}
 \usage{
 serialize_jws(payload, signing_key)
 }
@@ -15,10 +15,12 @@ serialize_jws(payload, signing_key)
 A JWS compact serialization as a string.
 }
 \description{
-This function generates a JWS (JSON Web Signature) Compact Serialization from the provided payload
-and secp256k1 signing key. It first encodes the JOSE header and payload using Base64 URL encoding,
-then signs the message and constructs the JWS string.
+This function generates a JWS (JSON Web Signature) Compact Serialization from
+the provided payload and secp256k1 signing (private)  key. It first encodes
+the JOSE header and payload using Base64 URL encoding, then signs the message
+using the "sign_message" function (from secp256k1.R) and constructs the JWS string.
 }
 \examples{
 serialize_jws("example payload", my_signing_key)
+
 }
