@@ -13,9 +13,11 @@ deserialize_jws(jws)
 A list containing the decoded header, payload, and signature.
 }
 \description{
-This function splits a JWS Compact Serialization into its component parts: header, payload, and signature.
+This function splits a JWS Compact Serialization into its component parts:
+header, payload, and signature.
 It decodes the Base64 URL encoded parts back into readable formats.
 }
 \examples{
 deserialize_jws(my_jws_string)
+
 }

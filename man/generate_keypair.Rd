@@ -7,7 +7,7 @@
 generate_keypair(priv_key = NULL, output_format = c("hex", "base64", "raw")[1])
 }
 \arguments{
-\item{priv_key}{Optional raw vector containing the 32-byte private key.}
+\item{priv_key}{Optional raw vector or hex string representing the 32-byte private key.}
 }
 \value{
 A list with:

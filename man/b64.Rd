@@ -2,7 +2,7 @@
 % Please edit documentation in R/jws.R
 \name{b64}
 \alias{b64}
-\title{Base64 URL encode function}
+\title{Base64 URL encode}
 \usage{
 b64(input_string)
 }
@@ -13,9 +13,11 @@ b64(input_string)
 A Base64 URL encoded string without padding.
 }
 \description{
-This function encodes a given string into Base64 URL format and removes any trailing '=' padding.
-It is useful for encoding data in a URL-safe way without padding characters.
+This function encodes a given string into Base64 URL format and removes any
+trailing '=' padding. It is useful for encoding data in a URL-safe way
+without padding characters.
 }
 \examples{
 b64("example string")
+
 }

@@ -11,7 +11,7 @@ encrypt_aes_cbc(iv, key, data)
 
 \item{key}{A raw vector of length 32 representing the AES key.}
 
-\item{data}{A raw vector representing the plaintext data/message to encrypt.}
+\item{data}{A raw vector representing the plain text data/message to encrypt.}
 }
 \value{
 A raw vector representing the encrypted data.
