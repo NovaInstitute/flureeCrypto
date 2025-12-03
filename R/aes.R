@@ -37,6 +37,8 @@ encrypt_aes_cbc <- function(iv, key, data) {
 #' 
 #' @return The encrypted data in the specified output format.
 #' 
+#' @importFrom digest AES
+#' 
 #' @export
 aes_encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42), output_format = "hex") {
   # If the provided key is a string, hash it into a 256-bit key (32 raw bytes).
@@ -117,6 +119,8 @@ decrypt_aes_cbc <- function(iv, key, encrypted_data) {
 #' @param output_format The format of the output. Options are "string" (default), "hex", or "none" for raw bytes.
 #'
 #' @return The decrypted data in the specified format.
+#' 
+#' @importFrom digest AES
 #' 
 #' @export
 aes_decrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42),
