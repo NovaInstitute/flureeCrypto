@@ -37,7 +37,7 @@ encrypt_aes_cbc <- function(iv, key, data) {
 #' 
 #' @return The encrypted data in the specified output format.
 #' 
-#' @importFrom digest AES
+#' @importFrom openssl AES
 #' 
 #' @export
 aes_encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42), output_format = "hex") {
@@ -120,7 +120,7 @@ decrypt_aes_cbc <- function(iv, key, encrypted_data) {
 #'
 #' @return The decrypted data in the specified format.
 #' 
-#' @importFrom digest AES
+#' @importFrom openssl AES
 #' 
 #' @export
 aes_decrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8, 46, 223, 106, 207, 55, 42),
