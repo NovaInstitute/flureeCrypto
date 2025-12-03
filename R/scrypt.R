@@ -1,12 +1,21 @@
 #' Generate Random Bytes
 #'
 #' @description
-#' Generates a random byte array of the specified size.
-#' This will work only in environments where random byte generation is supported.
+#' Generates a cryptographically secure random byte array of the specified size.
+#' This function uses OpenSSL's random number generator to produce high-quality
+#' random bytes suitable for cryptographic operations like salts and keys.
 #'
 #' @param size Integer. The size of the random byte array to generate.
 #' 
 #' @return A raw vector containing the random bytes.
+#' 
+#' @examples
+#' \dontrun{
+#' # Generate 16 random bytes for a salt
+#' salt <- random_bytes(16)
+#' # Generate 32 random bytes for a key
+#' key <- random_bytes(32)
+#' }
 #' 
 random_bytes <- function(size) {
   openssl::rand_bytes(size)

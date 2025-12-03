@@ -12,16 +12,19 @@ jose_header <- "{\"alg\":\"ES256K-R\",\"b64\":false,\"crit\":[\"b64\"]}"
 #' @description
 #' This function encodes a given string into Base64 URL format and removes any 
 #' trailing '=' padding. It is useful for encoding data in a URL-safe way 
-#' without padding characters.
+#' without padding characters. Used internally for JWS serialization.
 #'
 #' @param input_string A string to be encoded.
 #' 
 #' @return A Base64 URL encoded string without padding.
 #' 
 #' @examples
+#' \dontrun{
 #' b64("example string")
+#' }
 #' 
 #' @importFrom base64enc base64encode
+#' @keywords internal
 #' 
 b64 <- function(input_string) {
   b64_string <- base64enc::base64encode(charToRaw(input_string))
@@ -32,17 +35,22 @@ b64 <- function(input_string) {
 #'
 #' @description
 #' This function generates a JWS (JSON Web Signature) Compact Serialization from 
-#' the provided payload and secp256k1 signing (private)  key. It first encodes 
+#' the provided payload and secp256k1 signing (private) key. It first encodes 
 #' the JOSE header and payload using Base64 URL encoding, then signs the message 
 #' using the "sign_message" function (from secp256k1.R) and constructs the JWS string.
+#' The signature uses the ES256K-R algorithm (secp256k1 with recoverable signature).
 #'
-#' @param payload The payload to be included in the JWS.
-#' @param signing_key The secp256k1 signing key used to sign the payload.
+#' @param payload The payload to be included in the JWS as a string.
+#' @param signing_key The secp256k1 signing key (private key) used to sign the payload, as hex string or raw vector.
 #' 
-#' @return A JWS compact serialization as a string.
+#' @return A JWS compact serialization as a string in the format: header.payload.signature
 #' 
 #' @examples
+#' \dontrun{
 #' serialize_jws("example payload", my_signing_key)
+#' }
+#' 
+#' @keywords internal
 #' 
 serialize_jws <- function(payload, signing_key) {
   # JOSE header
@@ -71,14 +79,17 @@ serialize_jws <- function(payload, signing_key) {
 #' header, payload, and signature.
 #' It decodes the Base64 URL encoded parts back into readable formats.
 #'
-#' @param jws A JWS compact serialization string.
+#' @param jws A JWS compact serialization string in the format: header.payload.signature
 #' 
-#' @return A list containing the decoded header, payload, and signature.
+#' @return A list containing the decoded header (JSON string), payload (string), and signature (hex string).
 #' 
 #' @examples
+#' \dontrun{
 #' deserialize_jws(my_jws_string)
+#' }
 #' 
 #' @importFrom base64enc base64decode
+#' @keywords internal
 #' 
 deserialize_jws <- function(jws) {
   parts <- strsplit(jws, "\\.")[[1]]
@@ -95,16 +106,21 @@ deserialize_jws <- function(jws) {
 #' 
 #' @description
 #' This function verifies the signature of a JWS using the secp256k1 public key.
-#' It decodes the JWS, reconstructs the signing input, and checks if the 
-#' signature matches the input.
+#' It decodes the JWS, reconstructs the signing input, recovers the public key
+#' from the signature, and checks if it matches the provided public key.
 #'
 #' @param jws A JWS compact serialization string to be verified.
-#' @param public_key The secp256k1 public key used for verifying the signature
-#' .
+#' @param public_key The secp256k1 public key (hex string or raw vector) used for verifying the signature.
+#' 
 #' @return A list containing the payload and public key if verification is successful, otherwise an error is raised.
 #' 
 #' @examples
-#' verify(my_jws_string, my_public_key)
+#' \dontrun{
+#' verify_jws(my_jws_string, my_public_key)
+#' }
+#' 
+#' @keywords internal
+#' 
 verify_jws <- function(jws, public_key) {
   parts <- strsplit(jws, "\\.")[[1]]
   
