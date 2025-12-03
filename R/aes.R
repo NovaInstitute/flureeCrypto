@@ -8,7 +8,7 @@
 #'
 #' @param iv A raw vector of length 16 representing the initialization vector.
 #' @param key A raw vector of length 32 representing the AES key.
-#' @param data A raw vector representing the plaintext data/message to encrypt.
+#' @param data A raw vector representing the plain text data/message to encrypt.
 #' 
 #' @return A raw vector representing the encrypted data.
 #' 
