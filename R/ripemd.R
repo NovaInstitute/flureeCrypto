@@ -3,9 +3,11 @@
 #' This function calculates the RIPEMD-160 hash of the input byte array.
 #'
 #' @param x A raw vector or character string representing the byte array to be hashed.
+#' @param output_format The format of the output hash. Options are "hex" (default), "base64", or "raw".
 #'
-#' @return A raw vector representing the RIPEMD-160 hash is the specified output format.
+#' @return A character string (if "hex" or "base64") or raw vector (if "raw") representing the RIPEMD-160 hash.
 #' @import openssl
+#' @export
 #' @examples
 #' hash_ripemd160 <- ripemd_160("hi there!")
 #'

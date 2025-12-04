@@ -2,15 +2,17 @@
 #' Encrypt data using AES
 #' 
 #' @description
-#' This function performs AES encryption in CBC mode with PKCS#7 padding.
-#' It is called from the "encrypt" function below after all the necessary 
-#' conversions and type-checking has been done.
+#' This internal helper function performs AES encryption in CBC mode with PKCS#7 padding.
+#' It is called from the "aes_encrypt" function after all the necessary 
+#' conversions and type-checking has been done. This function should not be called directly.
 #'
 #' @param iv A raw vector of length 16 representing the initialization vector.
 #' @param key A raw vector of length 32 representing the AES key.
 #' @param data A raw vector representing the plain text data/message to encrypt.
 #' 
 #' @return A raw vector representing the encrypted data.
+#' 
+#' @keywords internal
 #' 
 encrypt_aes_cbc <- function(iv, key, data) {
   
@@ -81,15 +83,17 @@ aes_encrypt <- function(x, key, iv = c(6, 224, 71, 170, 241, 204, 115, 21, 30, 8
 #' Decrypt data using AES
 #' 
 #' @description
-#' This function decrypts a message using AES decryption in CBC mode with PKCS7 padding.
-#' It receives the necessary input from the "decrypt" function after all the 
-#' necessary type-checking and conversions have been done.
+#' This internal helper function decrypts a message using AES decryption in CBC mode with PKCS7 padding.
+#' It receives the necessary input from the "aes_decrypt" function after all the 
+#' necessary type-checking and conversions have been done. This function should not be called directly.
 #'
 #' @param iv A raw vector representing the initialization vector.
 #' @param key A raw vector representing the key for AES decryption. It should be exactly 16, 24, or 32 bytes.
 #' @param encrypted_data A raw vector representing the data to be decrypted.
 #'
-#' @return The character string representation of the decrypted data.
+#' @return A raw vector representing the decrypted data.
+#' 
+#' @keywords internal
 #' 
 decrypt_aes_cbc <- function(iv, key, encrypted_data) {
   

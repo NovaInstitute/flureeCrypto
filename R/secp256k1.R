@@ -4,15 +4,18 @@
 #' @description
 #' This wrapper function calls its corresponding C function which 
 #' checks if a provided private key is valid on the secp256k1 curve.
+#' A valid private key must be a 256-bit (32-byte) number within the valid range.
 #' 
 #' @param private_key_hex A string representing the private key in hexadecimal format.
 #' 
 #' @return An integer (1 if valid, 0 otherwise).
 #' 
 #' @examples
-#' # if (valid_private("6a5f415f49986006815ae7887016275aac8ffb239f9a2fa7172300578582b6c2")) {
-#' #   print("Private key is valid")
-#' # }
+#' \dontrun{
+#' if (valid_private("6a5f415f49986006815ae7887016275aac8ffb239f9a2fa7172300578582b6c2")) {
+#'   print("Private key is valid")
+#' }
+#' }
 #' 
 valid_private <- function(private_key_hex) {
   result <- .Call("valid_private_R", private_key_hex)
@@ -24,11 +27,17 @@ valid_private <- function(private_key_hex) {
 #' @description
 #' This wrapper function calls its corresponding C function which generates a 
 #' random 32-byte private key that is valid on the secp256k1 curve.
+#' The key is cryptographically secure and suitable for signing operations.
 #' 
-#' @return A raw vector containing the 32-byte private key.
+#' @param output_format The format of the output. Options are "hex" (default), "base64", or "raw".
+#' 
+#' @return A 32-byte private key in the specified format.
 #' 
 #' @examples
-#' # new_random_key <- generate_seckey(output_format = hex)
+#' \dontrun{
+#' # Generate a new random private key in hex format
+#' new_random_key <- generate_seckey(output_format = "hex")
+#' }
 #' 
 #' @importFrom base64enc base64encode
 #' 
@@ -221,12 +230,12 @@ public_key_from_message <- function(msg, sig) {
 #'
 #' @description
 #' This function generates a SIN from a given public key by leveraging the
-#' SHA-256 and RIPEMD-160 hash functions.
+#' SHA-256 and RIPEMD-160 hash functions, followed by Base58Check encoding.
+#' The SIN is used as a unique identifier derived from the public key.
 #'
 #' @param pub_key A character string (hexadecimal format) or raw vector representing the public key.
 #' @param output_format A character string specifying the output format.
-#'   Can be "hex" (hexadecimal string), "raw" (raw byte vector), or "base58" (Base58Check encoded string).
-#'   Default is "base58".
+#'   Can be "hex" (hexadecimal string), "raw" (raw byte vector), or "base58" (Base58Check encoded string, default).
 #'
 #' @return The SIN in the specified format. The output will be:
 #'   - a hexadecimal string if `output_format` is "hex",
@@ -234,8 +243,10 @@ public_key_from_message <- function(msg, sig) {
 #'   - a Base58Check encoded string if `output_format` is "base58".
 #'
 #' @examples
-#' # pub_key_hex <- "02991719b37817f6108fc8b0e824d3a9daa3d39bc97ecfd4f8bc7ef3b71d4c6391"
-#' # sin <- get_sin_from_public_key(pub_key_hex, output_format = "base58")
+#' \dontrun{
+#' pub_key_hex <- "02991719b37817f6108fc8b0e824d3a9daa3d39bc97ecfd4f8bc7ef3b71d4c6391"
+#' sin <- get_sin_from_public_key(pub_key_hex, output_format = "base58")
+#' }
 #' 
 #' @importFrom rbtc base58CheckEncode
 #'

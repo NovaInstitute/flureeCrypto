@@ -3,16 +3,19 @@
 #'
 #' @description
 #' This function takes a string key, hashes it using the SHA3-512 algorithm 
-#' and returns the first `n` bytes of the resulting hash.
+#' and returns the first `n` bytes of the resulting hash. The bytes are returned
+#' as signed integers (-128 to 127).
 #'
 #' @param key A character string or raw vector to be hashed.
 #' @param n An integer specifying the number of bytes to return from the hash. Must be between 1 and 64 (default is 32).
 #'
-#' @return A raw vector containing the first `n` bytes of the SHA3-512 hash.
+#' @return A numeric vector containing the first `n` bytes of the SHA3-512 hash as signed integers.
 #'
 #' @examples
-#' # hash_string_key("hello", 32)
-#' # hash_string_key(charToRaw("example-key"), 16)
+#' # Hash a string key and get 32 bytes
+#' hash_string_key("hello", 32)
+#' # Hash a raw vector key and get 16 bytes
+#' hash_string_key(charToRaw("example-key"), 16)
 #' 
 #' @importFrom openssl sha3
 #'
@@ -64,18 +67,17 @@ normalize_string <- function(s) {
 #'
 #' @description
 #' This function checks whether the input is a string or raw bytes and returns 
-#' a label indicating the format.
+#' a label indicating the format. Used internally to determine how to process input data.
 #'
 #' @param x The input to be checked, which can be a character string or raw vector.
 #'
 #' @return A character string indicating the format, either "string" or "bytes".
 #'
 #' @examples
-#' # input_format <- coerce_input_format("Hello, world!")
-#' # print(input_format)
-#'
-#' # input_format <- coerce_input_format(as.raw(1:5))
-#' # print(input_format)
+#' # Check format of a string
+#' coerce_input_format("Hello, world!")  # Returns "string"
+#' # Check format of a raw vector
+#' coerce_input_format(charToRaw("Hello"))  # Returns "bytes"
 #'
 coerce_input_format <- function(x) {
   if (is.character(x)) {
@@ -157,18 +159,19 @@ byte_array_to_string <- function(v) {
 #'
 #' @description
 #' This function takes a vector of integers and transforms each element:
-#' if an element is greater than 127, it subtracts 256 from that element
+#' if an element is greater than 127, it subtracts 256 from that element,
 #' otherwise, it leaves the element unchanged. 
-#' This represents the excess-127 format of signed bytes.
+#' This converts unsigned bytes (0-255) to signed bytes (-128 to 127).
 #'
-#' @param v A numeric vector.
+#' @param v A numeric vector of unsigned byte values (0-255).
 #' 
-#' @return A numeric vector with transformed values.
+#' @return A numeric vector with values converted to signed bytes (-128 to 127).
 #' 
 #' @examples
-#' # v <- c(130, 120, 127, 255)
-#' # result <- map_excess_127(v)
-#' # print(result)
+#' # Convert unsigned bytes to signed
+#' v <- c(130, 120, 127, 255)
+#' result <- map_excess_127(v)
+#' # Returns: c(-126, 120, 127, -1)
 #' 
 map_excess_127 <- function(v) {
   result <- ifelse(v > 127, v - 256, v)
@@ -178,17 +181,19 @@ map_excess_127 <- function(v) {
 #' Map signed to unsigned bytes
 #'
 #' @description
-#' This function takes a vector of integers and replaces negative integers
-#' with their positive counterparts (by adding 256).
+#' This function takes a vector of integers and converts negative integers
+#' (representing signed bytes) to their positive counterparts (unsigned bytes)
+#' by adding 256. This converts signed bytes (-128 to 127) to unsigned bytes (0-255).
 #'
-#' @param v A numeric vector.
+#' @param ba A numeric vector of signed byte values (-128 to 127).
 #' 
-#' @return A numeric vector with negative integers replaced.
+#' @return A numeric vector with negative integers converted to unsigned bytes (0-255).
 #' 
 #' @examples
-#' # v <- c(-5, 0, 10, -128, 255)
-#' # result <- map_signed_to_unsigned(v)
-#' # print(result)
+#' # Convert signed bytes to unsigned
+#' v <- c(-5, 0, 10, -128, 127)
+#' result <- map_signed_to_unsigned(v)
+#' # Returns: c(251, 0, 10, 128, 127)
 #' 
 map_signed_to_unsigned <- function(ba) {
   result <- ifelse(ba < 0, ba + 256, ba)

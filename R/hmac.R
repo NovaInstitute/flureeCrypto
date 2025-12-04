@@ -3,11 +3,12 @@
 #' @description Returns HMAC using SHA-256 hashing. Both key and message should be raw vectors.
 #'
 #' @param message A raw vector representing the message.
-#' @param output_format The format of the output hash. Options are "hex", "base64", or "raw" (default).
 #' @param key A raw vector representing the key.
+#' @param output_format The format of the output hash. Options are "hex", "base64", or "raw" (default).
 #'
-#' @return A raw vector containing the HMAC-SHA256 result.
+#' @return A character string (if "hex" or "base64") or raw vector (if "raw") containing the HMAC-SHA256 result.
 #' @import digest
+#' @export
 #' @examples
 #' # => (require '[alphabase.core :as alphabase])
 #' # => (def message (.getBytes "hello"))
