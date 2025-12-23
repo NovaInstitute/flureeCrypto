@@ -1,8 +1,3 @@
-library(jsonlite)  # For handling JSON
-library(openssl)   # For base64url encoding/decoding and key handling
-library(stringr)
-
-
 # This is a standard header that is used with each jws serialization
 jose_header <- "{\"alg\":\"ES256K-R\",\"b64\":false,\"crit\":[\"b64\"]}"
 
