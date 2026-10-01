@@ -6,3 +6,5 @@
 src/*.o
 src/*.so
 src/*.dll
+src/Makevars
+src/secp256k1/src/*.o

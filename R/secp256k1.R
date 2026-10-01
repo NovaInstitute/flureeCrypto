@@ -1,3 +1,6 @@
+#' @useDynLib flureeCrypto, .registration = TRUE
+NULL
+
 
 #' Validate private key
 #' 
@@ -18,7 +21,7 @@
 #' }
 #' 
 valid_private <- function(private_key_hex) {
-  result <- .Call("valid_private_R", private_key_hex)
+  result <- .Call(valid_private_R, private_key_hex)
   return(result)
 }
 
@@ -42,7 +45,7 @@ valid_private <- function(private_key_hex) {
 #' @importFrom base64enc base64encode
 #' 
 generate_seckey <- function(output_format = c("hex", "base64", "raw")[1]) {
-  privkey <- .Call("generate_seckey_R")
+  privkey <- .Call(generate_seckey_R)
   
   if (output_format == "hex") {
     return(bin2hex(privkey))
@@ -81,7 +84,7 @@ generate_seckey <- function(output_format = c("hex", "base64", "raw")[1]) {
 #' @export
 generate_keypair <- function(priv_key = NULL, output_format = c("hex", "base64", "raw")[1]) {
   if (is.null(priv_key)) {
-    keypair <- .Call("generate_keypair_R")
+    keypair <- .Call(generate_keypair_R)
     privkey = keypair[[1]]
     pubkey = keypair[[2]]
   } else {
@@ -89,7 +92,7 @@ generate_keypair <- function(priv_key = NULL, output_format = c("hex", "base64",
       seckey_r = hex2bin(priv_key)
     }
       privkey = seckey_r
-      pubkey = .Call("generate_keypair_with_seckey_R", seckey_r)
+      pubkey = .Call(generate_keypair_with_seckey_R, seckey_r)
   }
   
   if (output_format == "hex") {
@@ -141,7 +144,7 @@ sign_message <- function(msg, priv_key, output_format = c("hex", "base64", "raw"
     stop("The private key should be a hexadecimal string or raw vector.")
   }
   
-  signature <- .Call("sign_R_R", msg_hash, priv_key)
+  signature <- .Call(sign_R_R, msg_hash, priv_key)
   
   if (output_format == "hex") {
     return(bin2hex(signature))
@@ -221,7 +224,7 @@ public_key_from_message <- function(msg, sig) {
   } else {
     hash <- msg
   }
-  recovered <- .Call("ecrecover_R", sig, hash)
+  recovered <- .Call(ecrecover_R, sig, hash)
   return(bin2hex(recovered))
 }
 
@@ -362,7 +365,7 @@ account_id_from_message <- function(msg, sig) {
   } else {
     hash <- msg
   }
-  recovered_public <- .Call("ecrecover_R", sig, hash)
+  recovered_public <- .Call(ecrecover_R, sig, hash)
   acc_id <- account_id_from_public(recovered_public)
   return(acc_id)
 }

@@ -1,0 +1,73 @@
+#!/bin/sh
+# Find GNU GMP and write src/Makevars. libsecp256k1 is bundled and needs nothing.
+# Override the search with INCLUDE_DIR and/or LIB_DIR, e.g.
+#   R CMD INSTALL --configure-vars='INCLUDE_DIR=/opt/gmp/include LIB_DIR=/opt/gmp/lib' .
+
+PKG_CONFIG_NAME="gmp"
+PKG_DEB_NAME="libgmp-dev"
+PKG_RPM_NAME="gmp-devel"
+PKG_BREW_NAME="gmp"
+PKG_LIBS_DEFAULT="-lgmp"
+
+if [ -z "${R_HOME}" ]; then
+  R_HOME=`R RHOME`
+fi
+CC=`"${R_HOME}/bin/R" CMD config CC`
+CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
+CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
+LDFLAGS=`"${R_HOME}/bin/R" CMD config LDFLAGS`
+
+if [ -n "${INCLUDE_DIR}" ] || [ -n "${LIB_DIR}" ]; then
+  echo "Using INCLUDE_DIR=${INCLUDE_DIR} and LIB_DIR=${LIB_DIR}"
+  PKG_CFLAGS=""
+  PKG_LIBS="${PKG_LIBS_DEFAULT}"
+  [ -n "${INCLUDE_DIR}" ] && PKG_CFLAGS="-I${INCLUDE_DIR}"
+  [ -n "${LIB_DIR}" ] && PKG_LIBS="-L${LIB_DIR} ${PKG_LIBS_DEFAULT}"
+elif pkg-config --exists ${PKG_CONFIG_NAME} 2>/dev/null; then
+  echo "Found pkg-config cflags and libs for ${PKG_CONFIG_NAME}"
+  PKG_CFLAGS=`pkg-config --cflags ${PKG_CONFIG_NAME}`
+  PKG_LIBS=`pkg-config --libs ${PKG_CONFIG_NAME}`
+elif command -v brew >/dev/null 2>&1 && BREWDIR=`brew --prefix ${PKG_BREW_NAME} 2>/dev/null` && [ -d "${BREWDIR}" ]; then
+  echo "Using Homebrew ${PKG_BREW_NAME} at ${BREWDIR}"
+  PKG_CFLAGS="-I${BREWDIR}/include"
+  PKG_LIBS="-L${BREWDIR}/lib ${PKG_LIBS_DEFAULT}"
+else
+  PKG_CFLAGS=""
+  PKG_LIBS="${PKG_LIBS_DEFAULT}"
+fi
+
+# A compiler called by full path (not the /usr/bin shim) may not find the macOS
+# SDK when linking; point it there the way the shim does.
+if [ "`uname`" = "Darwin" ] && [ -z "${SDKROOT}" ] && command -v xcrun >/dev/null 2>&1; then
+  SDKROOT=`xcrun --show-sdk-path 2>/dev/null`
+  export SDKROOT
+fi
+
+# Test-compile and link a program that uses GMP.
+TMPDIR_CONF=`mktemp -d 2>/dev/null || echo "/tmp/flureeCrypto-conf$$"`
+mkdir -p "${TMPDIR_CONF}"
+cat > "${TMPDIR_CONF}/conftest.c" <<CEOF
+#include <gmp.h>
+int main(void) { mpz_t x; mpz_init_set_ui(x, 1); mpz_clear(x); return 0; }
+CEOF
+if ${CC} ${CPPFLAGS} ${PKG_CFLAGS} ${CFLAGS} "${TMPDIR_CONF}/conftest.c" -o "${TMPDIR_CONF}/conftest" ${LDFLAGS} ${PKG_LIBS} >"${TMPDIR_CONF}/conftest.log" 2>&1; then
+  rm -rf "${TMPDIR_CONF}"
+else
+  echo "------------------------- ANTICONF ERROR ---------------------------"
+  echo "Configuration failed because GNU GMP was not found. Try installing:"
+  echo " * deb: ${PKG_DEB_NAME} (Debian, Ubuntu, etc)"
+  echo " * rpm: ${PKG_RPM_NAME} (Fedora, CentOS, RHEL)"
+  echo " * brew: ${PKG_BREW_NAME} (macOS)"
+  echo "If GMP is already installed, set INCLUDE_DIR and LIB_DIR, e.g.:"
+  echo "R CMD INSTALL --configure-vars='INCLUDE_DIR=... LIB_DIR=...'"
+  echo "-------------------------- [ERROR MESSAGE] ---------------------------"
+  cat "${TMPDIR_CONF}/conftest.log"
+  echo "--------------------------------------------------------------------"
+  rm -rf "${TMPDIR_CONF}"
+  exit 1
+fi
+
+echo "Using PKG_CFLAGS=${PKG_CFLAGS}"
+echo "Using PKG_LIBS=${PKG_LIBS}"
+sed -e "s|@cflags@|${PKG_CFLAGS}|" -e "s|@libs@|${PKG_LIBS}|" src/Makevars.in > src/Makevars
+exit 0

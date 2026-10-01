@@ -1,9 +1,13 @@
 Package: flureeCrypto
 Title: Crypto Functions from Fluree based in clojure originals
 Version: 0.0.0.9000
-Authors@R: person("Christiaan Pauw",
-                  email = "cjpauw@gmail.com",
-                  role = c("aut", "cre"))
+Authors@R: c(
+    person("Christiaan Pauw", email = "cjpauw@gmail.com",
+           role = c("aut", "cre")),
+    person("Pieter Wuille", role = "cph",
+           comment = "bundled libsecp256k1, see inst/COPYRIGHTS"),
+    person("libsecp256k1 contributors", role = "cph",
+           comment = "bundled libsecp256k1, see inst/COPYRIGHTS"))
 Description: Provides the crypto functions from the Fluree  in natively R. These functions are based on the original clojure functions.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -21,4 +25,4 @@ Imports:
     sodium,
     stringi,
     stringr
-SystemRequirements: libsecp256k1, GNU GMP
+SystemRequirements: GNU GMP

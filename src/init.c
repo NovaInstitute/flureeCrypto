@@ -1,11 +1,12 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
+#include <R_ext/Visibility.h>
 
 extern SEXP valid_private_R(SEXP private_key_hex);
-extern SEXP generate_seckey_R();
+extern SEXP generate_seckey_R(void);
 extern SEXP format_public_key_R(SEXP pubkey_r);
-extern SEXP generate_keypair_R();
+extern SEXP generate_keypair_R(void);
 extern SEXP generate_keypair_with_seckey_R(SEXP seckey_r);
 extern SEXP sign_R_R(SEXP msg_hash_r, SEXP priv_key_r);
 extern SEXP ecrecover_R(SEXP hex_signature_R, SEXP hash_R); 
@@ -22,7 +23,7 @@ static const R_CallMethodDef CallEntries[] = {
 	{NULL, NULL, 0}
 };
 
-void R_init_flureeCrypto(DllInfo *dll) {
+void attribute_visible R_init_flureeCrypto(DllInfo *dll) {
 	R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
 	R_useDynamicSymbols(dll, FALSE);
 }
