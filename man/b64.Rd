@@ -15,9 +15,12 @@ A Base64 URL encoded string without padding.
 \description{
 This function encodes a given string into Base64 URL format and removes any
 trailing '=' padding. It is useful for encoding data in a URL-safe way
-without padding characters.
+without padding characters. Used internally for JWS serialization.
 }
 \examples{
+\dontrun{
 b64("example string")
+}
 
 }
+\keyword{internal}

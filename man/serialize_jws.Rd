@@ -7,20 +7,24 @@
 serialize_jws(payload, signing_key)
 }
 \arguments{
-\item{payload}{The payload to be included in the JWS.}
+\item{payload}{The payload to be included in the JWS as a string.}
 
-\item{signing_key}{The secp256k1 signing key used to sign the payload.}
+\item{signing_key}{The secp256k1 signing key (private key) used to sign the payload, as hex string or raw vector.}
 }
 \value{
-A JWS compact serialization as a string.
+A JWS compact serialization as a string in the format: header.payload.signature
 }
 \description{
 This function generates a JWS (JSON Web Signature) Compact Serialization from
-the provided payload and secp256k1 signing (private)  key. It first encodes
+the provided payload and secp256k1 signing (private) key. It first encodes
 the JOSE header and payload using Base64 URL encoding, then signs the message
 using the "sign_message" function (from secp256k1.R) and constructs the JWS string.
+The signature uses the ES256K-R algorithm (secp256k1 with recoverable signature).
 }
 \examples{
+\dontrun{
 serialize_jws("example payload", my_signing_key)
+}
 
 }
+\keyword{internal}
