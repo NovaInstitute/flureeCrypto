@@ -7,10 +7,10 @@
 deserialize_jws(jws)
 }
 \arguments{
-\item{jws}{A JWS compact serialization string.}
+\item{jws}{A JWS compact serialization string in the format: header.payload.signature}
 }
 \value{
-A list containing the decoded header, payload, and signature.
+A list containing the decoded header (JSON string), payload (string), and signature (hex string).
 }
 \description{
 This function splits a JWS Compact Serialization into its component parts:
@@ -18,6 +18,9 @@ header, payload, and signature.
 It decodes the Base64 URL encoded parts back into readable formats.
 }
 \examples{
+\dontrun{
 deserialize_jws(my_jws_string)
+}
 
 }
+\keyword{internal}

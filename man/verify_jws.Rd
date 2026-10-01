@@ -9,17 +9,20 @@ verify_jws(jws, public_key)
 \arguments{
 \item{jws}{A JWS compact serialization string to be verified.}
 
-\item{public_key}{The secp256k1 public key used for verifying the signature
-.}
+\item{public_key}{The secp256k1 public key (hex string or raw vector) used for verifying the signature.}
 }
 \value{
 A list containing the payload and public key if verification is successful, otherwise an error is raised.
 }
 \description{
 This function verifies the signature of a JWS using the secp256k1 public key.
-It decodes the JWS, reconstructs the signing input, and checks if the
-signature matches the input.
+It decodes the JWS, reconstructs the signing input, recovers the public key
+from the signature, and checks if it matches the provided public key.
 }
 \examples{
-verify(my_jws_string, my_public_key)
+\dontrun{
+verify_jws(my_jws_string, my_public_key)
 }
+
+}
+\keyword{internal}

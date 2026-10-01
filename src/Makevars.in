@@ -1,0 +1,9 @@
+# libsecp256k1 is bundled in secp256k1/ (see inst/COPYRIGHTS); GMP comes from
+# the system and its flags are filled in by ../configure.
+PKG_CPPFLAGS = -Isecp256k1/include -DENABLE_MODULE_RECOVERY=1 -DENABLE_MODULE_ECDH=1 \
+	-DUSE_EXTERNAL_DEFAULT_CALLBACKS=1 -DSECP256K1_NO_API_VISIBILITY_ATTRIBUTES @cflags@
+PKG_CFLAGS = $(C_VISIBILITY)
+PKG_LIBS = @libs@
+
+OBJECTS = init.o secp256k1.o secp256k1/src/secp256k1.o \
+	secp256k1/src/precomputed_ecmult.o secp256k1/src/precomputed_ecmult_gen.o

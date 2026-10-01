@@ -5,7 +5,20 @@
 #include <secp256k1_recovery.h>
 #include <gmp.h>
 #include <string.h>
-#include<assert.h>
+
+
+// libsecp256k1 is built with USE_EXTERNAL_DEFAULT_CALLBACKS, so instead of
+// printing to stderr and calling abort() it reports misuse and internal
+// failures through these, which raise an R error.
+void secp256k1_default_illegal_callback_fn(const char* str, void* data) {
+  (void)data;
+  Rf_error("libsecp256k1 illegal argument: %s", str);
+}
+
+void secp256k1_default_error_callback_fn(const char* str, void* data) {
+  (void)data;
+  Rf_error("libsecp256k1 internal error: %s", str);
+}
 
 
 // Helper functions
@@ -15,13 +28,13 @@ void hex_to_biginteger(const char* hex, mpz_t result);
 int hex_to_bytes(const char *hex, unsigned char *bytes, size_t bytes_len);
 
 char* format_public_key(const unsigned char *pubkey);
-char* get_modulus();
+char* get_modulus(void);
 
 // R-callable functions
 SEXP valid_private_R(SEXP private_key_hex);
-SEXP generate_seckey_R();
+SEXP generate_seckey_R(void);
 SEXP format_public_key_R(SEXP pubkey_r);
-SEXP generate_keypair_R();
+SEXP generate_keypair_R(void);
 SEXP generate_keypair_with_seckey_R(SEXP seckey_r);
 SEXP sign_R_R(SEXP msg_hash_r, SEXP priv_key_r);
 SEXP ecrecover_R(SEXP hex_signature_R, SEXP hash_R);
@@ -83,7 +96,7 @@ int hex_to_bytes(const char *hex, unsigned char *bytes, size_t bytes_len) {
 
 
 // Function to get the modulus (n) as a character string
-char* get_modulus() {
+char* get_modulus(void) {
   // The order of the secp256k1 curve, defined in bytes
   const unsigned char secp256k1_n[32] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -95,13 +108,12 @@ char* get_modulus() {
   // Allocate memory for the hex string (2 characters per byte + null terminator)
   char *hex_string = (char *) malloc(2 * sizeof(secp256k1_n) + 1);
   if (hex_string == NULL) {
-    fprintf(stderr, "Memory allocation failed\n");
-    exit(EXIT_FAILURE);
+    error("Memory allocation failed");
   }
   
   // Convert the byte array to a hex string
   for (size_t i = 0; i < sizeof(secp256k1_n); i++) {
-    sprintf(hex_string + (i * 2), "%02x", secp256k1_n[i]);
+    snprintf(hex_string + (i * 2), 3, "%02x", secp256k1_n[i]);
   }
   
   return hex_string;  // Return the hex string
@@ -145,7 +157,7 @@ SEXP valid_private_R(SEXP private_key_hex) {
 
 
 
-SEXP generate_seckey_R() {
+SEXP generate_seckey_R(void) {
   // Allocate memory for the secret key
   unsigned char seckey[32];
   
@@ -163,8 +175,12 @@ SEXP generate_seckey_R() {
       secp256k1_context_destroy(ctx);
       error("Failed to open /dev/urandom");  // Raise an error to R
     }
-    fread(seckey, 32, 1, file_p);
+    size_t nread = fread(seckey, 32, 1, file_p);
     fclose(file_p);
+    if (nread != 1) {
+      secp256k1_context_destroy(ctx);
+      error("Failed to read from /dev/urandom");
+    }
     
     success = secp256k1_ec_seckey_verify(ctx, seckey);
   } while (!success);
@@ -186,13 +202,11 @@ SEXP generate_seckey_R() {
 char* format_public_key(const unsigned char *pubkey) {
   secp256k1_context *ctx = secp256k1_context_create(SECP256K1_CONTEXT_VERIFY);
   if (ctx == NULL) {
-    fprintf(stderr, "Failed to create secp256k1 context\n");
     return NULL;
   }
   
   secp256k1_pubkey pubkey_struct;
   if (!secp256k1_ec_pubkey_parse(ctx, &pubkey_struct, pubkey, 65)) {
-    fprintf(stderr, "Failed to parse public key\n");
     secp256k1_context_destroy(ctx);
     return NULL;
   }
@@ -203,13 +217,12 @@ char* format_public_key(const unsigned char *pubkey) {
   
   char *hex_string = (char *)malloc(2 * compressed_pubkey_len + 1);
   if (hex_string == NULL) {
-    fprintf(stderr, "Memory allocation failed\n");
     secp256k1_context_destroy(ctx);
     return NULL;
   }
   
   for (size_t i = 0; i < compressed_pubkey_len; i++) {
-    sprintf(hex_string + (i * 2), "%02x", compressed_pubkey[i]);
+    snprintf(hex_string + (i * 2), 3, "%02x", compressed_pubkey[i]);
   }
   hex_string[2 * compressed_pubkey_len] = '\0';
   
@@ -249,7 +262,7 @@ SEXP format_public_key_R(SEXP pubkey_r) {
 
 
 
-SEXP generate_keypair_R() {
+SEXP generate_keypair_R(void) {
   // Allocate space for secret key and public key
   unsigned char seckey[32];
   unsigned char pubkey[65]; // Uncompressed public key is 65 bytes
